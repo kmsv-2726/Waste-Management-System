@@ -3,21 +3,19 @@
 #include <WiFi.h>
 #include <time.h>
 
-/* ---------- LoRa Pins ---------- */
+/* ---------- LoRa ---------- */
 #define LORA_SS   5
 #define LORA_RST  27
 #define LORA_DIO0 26
 
-/* ---------- Config ---------- */
-#define TOTAL_NODES 2
-#define SCAN_TIMEOUT_MS 20000
-#define MAX_RETRIES 2
-
-/* ---------- WiFi ---------- */
+/* ---------- WiFi / NTP ---------- */
 const char* ssid = "CSE23728";
 const char* password = "Mani@123";
 
-/* ---------- State ---------- */
+/* ---------- System ---------- */
+#define TOTAL_NODES 2
+#define SCAN_TIMEOUT_MS 30000
+
 enum State { IDLE, SCANNING };
 State systemState = IDLE;
 
@@ -28,18 +26,16 @@ int emergencyHead = 0, emergencyTail = 0;
 
 /* ---------- Scan tracking ---------- */
 int currentNode = -1;
-unsigned long scanStartTime = 0;
-int retryCount = 0;
+unsigned long lastRxTime = 0;
+bool hourlyScanDoneThisHour = false;
 
 /* ---------- Queue helpers ---------- */
 bool queueEmpty(int h, int t) { return h == t; }
 void queuePush(int q[], int &t, int v) { q[t] = v; t = (t + 1) % 10; }
 int queuePop(int q[], int &h) { int v = q[h]; h = (h + 1) % 10; return v; }
 
-/* ---------- Setup ---------- */
 void setup() {
   Serial.begin(115200);
-  delay(1000);
 
   LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
   if (!LoRa.begin(433E6)) while (1);
@@ -48,12 +44,12 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) delay(500);
   configTime(0, 0, "pool.ntp.org");
 
-  Serial.println("[SYS] ESP32 Master Ready");
+  Serial.println("[SYS] ESP32 Master Ready (NTP)");
 }
 
-/* ---------- Loop ---------- */
 void loop() {
   handleSerial();
+  handleHourlyScheduler();
   handleLoRaRx();
 
   if (systemState == SCANNING) checkTimeout();
@@ -73,42 +69,30 @@ void scheduler() {
 /* ---------- Start Scan ---------- */
 void startScan(int node) {
   currentNode = node;
-  retryCount = 0;
   systemState = SCANNING;
-  sendScanCommand();
-}
-
-/* ---------- Send Scan ---------- */
-void sendScanCommand() {
-  scanStartTime = millis();
+  lastRxTime = millis();
 
   Serial.print("[EXEC] Scanning Node ");
-  Serial.print(currentNode);
-  Serial.print(" (attempt ");
-  Serial.print(retryCount + 1);
-  Serial.println(")");
+  Serial.println(node);
 
   LoRa.beginPacket();
   LoRa.print("CMD,SCAN,");
-  LoRa.print(currentNode);
+  LoRa.print(node);
   LoRa.endPacket();
 }
 
 /* ---------- Timeout ---------- */
 void checkTimeout() {
-  if (millis() - scanStartTime > SCAN_TIMEOUT_MS) {
-    if (retryCount < MAX_RETRIES) {
-      retryCount++;
-      Serial.println("[RETRY] Scan retry");
-      sendScanCommand();
-    } else {
-      Serial.println("[FAIL] Node unresponsive");
-      systemState = IDLE;
-    }
+  if (millis() - lastRxTime > SCAN_TIMEOUT_MS) {
+    Serial.print("[FAIL] Node ");
+    Serial.print(currentNode);
+    Serial.println(" timeout");
+    systemState = IDLE;
+    currentNode = -1;
   }
 }
 
-/* ---------- Serial ---------- */
+/* ---------- Manual Override ---------- */
 void handleSerial() {
   if (!Serial.available()) return;
 
@@ -126,72 +110,70 @@ void handleSerial() {
   }
 }
 
-/* ---------- LoRa RX ---------- */
+/* ---------- Hourly Scheduler ---------- */
+void handleHourlyScheduler() {
+  struct tm t;
+  if (!getLocalTime(&t)) return;
+
+  if (t.tm_min == 0 && !hourlyScanDoneThisHour) {
+    for (int i = 1; i <= TOTAL_NODES; i++)
+      queuePush(manualQueue, manualTail, i);
+
+    hourlyScanDoneThisHour = true;
+    Serial.println("[SCHED] Hourly scan queued");
+    printQueues();
+  }
+
+  if (t.tm_min != 0) hourlyScanDoneThisHour = false;
+}
+
+/* ---------- LoRa RX + Parsing ---------- */
 void handleLoRaRx() {
   int p = LoRa.parsePacket();
   if (!p) return;
 
   String msg = "";
   while (LoRa.available()) msg += (char)LoRa.read();
+  lastRxTime = millis();
 
-  int rssi = LoRa.packetRssi();
   Serial.print("[RX] ");
-  Serial.print(msg);
-  Serial.print(" | RSSI=");
-  Serial.println(rssi);
+  Serial.println(msg);
 
-  if (msg.startsWith("NODE," + String(currentNode) + ",ANGLE")) {
-    sendAdaptiveDelay(rssi);
-  }
-
-  if (msg == "NODE," + String(currentNode) + ",SCAN_DONE") {
-    sendAck();
-    Serial.println("[EXEC] Scan complete");
+  if (msg.startsWith("NODE," + String(currentNode) + ",SCAN")) {
+    parseScan(msg);
     systemState = IDLE;
+    currentNode = -1;
     printQueues();
   }
-
-  if (msg.startsWith("EMERGENCY")) {
-    int node = msg.substring(10).toInt();
-    queuePush(emergencyQueue, emergencyTail, node);
-    Serial.print("[EMERG] Node ");
-    Serial.println(node);
-  }
 }
 
-/* ---------- Adaptive Delay ---------- */
-void sendAdaptiveDelay(int rssi) {
-  int delayMs;
+/* ---------- Scan Parsing ---------- */
+void parseScan(String msg) {
+  // NODE,id,SCAN,temp,gas,angle:data|...
+  int idx1 = msg.indexOf(',', 10);
+  int idx2 = msg.indexOf(',', idx1 + 1);
+  int idx3 = msg.indexOf(',', idx2 + 1);
+  int idx4 = msg.indexOf(',', idx3 + 1);
 
-  if (rssi > -70) delayMs = 1000;
-  else if (rssi > -85) delayMs = 3000;
-  else delayMs = 6000;
+  int temp = msg.substring(idx3 + 1, idx4).toInt();
+  int gas  = msg.substring(idx4 + 1, msg.indexOf(',', idx4 + 1)).toInt();
 
-  LoRa.beginPacket();
-  LoRa.print("ACK,DELAY,");
-  LoRa.print(delayMs);
-  LoRa.endPacket();
+  Serial.print("[DATA] Temp=");
+  Serial.print(temp);
+  Serial.print(" Gas=");
+  Serial.println(gas);
 
-  Serial.print("[CTRL] Delay set to ");
-  Serial.print(delayMs);
-  Serial.println(" ms");
+  String angles = msg.substring(msg.lastIndexOf(',') + 1);
+  Serial.print("[DATA] Angles: ");
+  Serial.println(angles);
 }
 
-/* ---------- ACK ---------- */
-void sendAck() {
-  LoRa.beginPacket();
-  LoRa.print("ACK,");
-  LoRa.print(currentNode);
-  LoRa.endPacket();
-}
-
-/* ---------- Queue Print ---------- */
+/* ---------- Queue Display ---------- */
 void printQueues() {
   Serial.print("[QUEUE] Emergency: [ ");
   int i = emergencyHead;
   while (i != emergencyTail) {
-    Serial.print(emergencyQueue[i]);
-    Serial.print(" ");
+    Serial.print(emergencyQueue[i]); Serial.print(" ");
     i = (i + 1) % 10;
   }
   Serial.println("]");
@@ -199,8 +181,7 @@ void printQueues() {
   Serial.print("[QUEUE] Manual   : [ ");
   i = manualHead;
   while (i != manualTail) {
-    Serial.print(manualQueue[i]);
-    Serial.print(" ");
+    Serial.print(manualQueue[i]); Serial.print(" ");
     i = (i + 1) % 10;
   }
   Serial.println("]");
