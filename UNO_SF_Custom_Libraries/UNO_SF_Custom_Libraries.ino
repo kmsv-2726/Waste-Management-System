@@ -1,38 +1,33 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <Servo.h>
-#include <DHT.h>
+#include "UltrasonicDriver.h"   
+#include "DHT11_Driver.h"       
 
-/* ---------- CONFIG ---------- */
 #define NODE_ID 2
-#define PROTOCOL "SCANv1"
+#define PROTOCOL "SCANv1"       
 
-/* ---------- LoRa ---------- */
 #define LORA_SS   10
 #define LORA_RST  9
 #define LORA_DIO0 2
 
-/* ---------- Pins ---------- */
 #define SERVO_PIN 6
 #define TRIG_PIN  4
 #define ECHO_PIN  3
 #define GAS_PIN   A0
 #define BAT_PIN   A1
 #define DHT_PIN   7
-#define DHT_TYPE  DHT11
 
 #define LOW_BATTERY 3.5
 #define ACK_TIMEOUT 3000
 #define MAX_RETRY   3
 
 Servo servo;
-DHT dht(DHT_PIN, DHT_TYPE);
+UltrasonicDriver ultrasonic(TRIG_PIN, ECHO_PIN); // 🔵 REPLACED OLD FUNCTION
+DHT11_Driver dht(DHT_PIN);                       // 🔵 REPLACED DHT LIB
 
 int seq_id = 0;
-bool waitingACK = false;
-unsigned long ackTimer;
 
-/* ---------- Utils ---------- */
 void log(String msg) {
   Serial.print("[NODE ");
   Serial.print(NODE_ID);
@@ -42,41 +37,36 @@ void log(String msg) {
 
 float readBattery() {
   int raw = analogRead(BAT_PIN);
-  float v = (raw / 1023.0) * 5.0 * 2.0; // divider
-  return v;
+  return (raw / 1023.0) * 5.0 * 2.0;
 }
 
-int readUltrasonic() {
-  digitalWrite(TRIG_PIN, LOW); delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-
-  long d = pulseIn(ECHO_PIN, HIGH, 30000);
-  return d > 0 ? d / 58 : -1;
-}
-
-/* ---------- Setup ---------- */
 void setup() {
   Serial.begin(9600);
 
   servo.attach(SERVO_PIN);
   servo.write(30);
 
-  pinMode(TRIG_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT);
-
-  dht.begin();
+  ultrasonic.begin();     // 🔵 NEW
+  dht.begin();            // 🔵 NEW
 
   LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
-  if (!LoRa.begin(433E6)) while (1);
+  if (!LoRa.begin(433E6)) {
+    Serial.println("LoRa Failed!");
+    while (1);
+  }
+
+  // SF LoRA Communication
+  LoRa.setSpreadingFactor(10);
+  LoRa.setSignalBandwidth(125E3);
+  LoRa.setCodingRate4(5);
+  LoRa.enableCrc();
 
   log("Node Ready");
 }
 
-/* ---------- Loop ---------- */
 void loop() {
-  int p = LoRa.parsePacket();
-  if (!p) return;
+  int packetSize = LoRa.parsePacket();
+  if (!packetSize) return;
 
   String msg = "";
   while (LoRa.available()) msg += (char)LoRa.read();
@@ -84,32 +74,16 @@ void loop() {
   if (msg == "CMD,SCAN," + String(NODE_ID)) {
     runScan();
   }
-
-  if (msg == "ACKv1," + String(NODE_ID) + "," + String(seq_id)) {
-    waitingACK = false;
-    log("ACK received");
-  }
 }
 
-/* ---------- Scan ---------- */
 void runScan() {
   seq_id++;
 
   float battery = readBattery();
-  if (battery < LOW_BATTERY) {
-    LoRa.beginPacket();
-    LoRa.print("NODE,");
-    LoRa.print(NODE_ID);
-    LoRa.print(",ALERTv1,LOW_BATTERY,");
-    LoRa.print(battery);
-    LoRa.endPacket();
-    log("LOW BATTERY ALERT SENT");
-  }
 
-  int temp = dht.readTemperature();
-  if (temp == 0 || isnan(temp)) {
-    delay(1000);
-    temp = dht.readTemperature();
+  int temp = -1, hum = -1;
+  if (!dht.read(temp, hum)) {
+    log("DHT Failed");
   }
 
   int gas = analogRead(GAS_PIN);
@@ -119,13 +93,11 @@ void runScan() {
   payload += String(gas) + ",";
   payload += String(battery) + ",";
 
-  for (int angle = 30; angle <= 150; angle += 10) {
+  for (int angle = 30; angle <= 150; angle += 30) {
     servo.write(angle);
     delay(300);
 
-    int dist = readUltrasonic();
-    log("Angle " + String(angle));
-
+    int dist = ultrasonic.readDistance(); 
     payload += String(angle) + ":" + String(dist);
     if (angle < 150) payload += "|";
   }
@@ -133,9 +105,9 @@ void runScan() {
   sendWithRetry(payload);
 }
 
-/* ---------- Send + Retry ---------- */
 void sendWithRetry(String data) {
   for (int i = 0; i < MAX_RETRY; i++) {
+
     LoRa.beginPacket();
     LoRa.print("NODE,");
     LoRa.print(NODE_ID);
@@ -145,17 +117,16 @@ void sendWithRetry(String data) {
     LoRa.print(data);
     LoRa.endPacket();
 
-    waitingACK = true;
-    ackTimer = millis();
+    unsigned long start = millis();
 
-    while (waitingACK && millis() - ackTimer < ACK_TIMEOUT) {
+    while (millis() - start < ACK_TIMEOUT) {
       int p = LoRa.parsePacket();
       if (!p) continue;
 
       String r = "";
       while (LoRa.available()) r += (char)LoRa.read();
+
       if (r == "ACKv1," + String(NODE_ID) + "," + String(seq_id)) {
-        waitingACK = false;
         log("ACK OK");
         return;
       }
