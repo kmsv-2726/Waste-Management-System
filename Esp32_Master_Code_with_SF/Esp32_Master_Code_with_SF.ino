@@ -8,18 +8,29 @@
 #define LORA_RST  27
 #define LORA_DIO0 26
 
+/* 🔵 NEW: Match Node PHY */
+#define LORA_FREQ 433E6
+#define SPREADING_FACTOR 10
+#define BANDWIDTH 125E3
+#define CODING_RATE 5
+
 /* ---------- WiFi ---------- */
-const char* ssid = "YOUR_WIFI";
-const char* password = "YOUR_PASS";
+const char* ssid = "CSE23728";
+const char* password = "Mani@123";
 
 /* ---------- System ---------- */
 #define TOTAL_NODES 2
+#define SCAN_TIMEOUT 50000   
+
 enum State { IDLE, SCANNING };
 State state = IDLE;
 
 int manualQ[10], emergencyQ[10];
 int mh=0, mt=0, eh=0, et=0;
 int currentNode = -1;
+
+unsigned long scanStartTime = 0;   
+int lastScheduledHour = -1;       
 
 /* ---------- Utils ---------- */
 bool empty(int h,int t){return h==t;}
@@ -32,18 +43,18 @@ void setup() {
   Serial.println("[SYS] Booting ESP32");
 
   WiFi.begin(ssid, password);
-  Serial.print("[WIFI] Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500); Serial.print(".");
-  }
-  Serial.println("\n[WIFI] Connected");
-  Serial.println(WiFi.localIP());
+  while (WiFi.status() != WL_CONNECTED) delay(500);
 
   configTime(0,0,"pool.ntp.org");
-  Serial.println("[TIME] NTP Ready");
 
   LoRa.setPins(LORA_SS,LORA_RST,LORA_DIO0);
-  if (!LoRa.begin(433E6)) while(1);
+  if (!LoRa.begin(LORA_FREQ)) while(1);
+
+  /* Spreading Factor */
+  LoRa.setSpreadingFactor(SPREADING_FACTOR);
+  LoRa.setSignalBandwidth(BANDWIDTH);
+  LoRa.setCodingRate4(CODING_RATE);
+  LoRa.enableCrc();
 
   Serial.println("[SYS] System Ready");
 }
@@ -54,6 +65,12 @@ void loop() {
   handleLoRa();
 
   if (state == IDLE) scheduler();
+  if (state == SCANNING && millis() - scanStartTime > SCAN_TIMEOUT) {
+    Serial.println("[TIMEOUT] Node did not respond");
+    state = IDLE;
+  }
+
+  hourScheduler();  
 }
 
 /* ---------- Scheduler ---------- */
@@ -62,10 +79,22 @@ void scheduler() {
   else if (!empty(mh,mt)) startScan(pop(manualQ,mh));
 }
 
+/* ---------- Hour Based Scheduler ---------- */
+void hourScheduler() {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) return;
+
+  if (timeinfo.tm_hour != lastScheduledHour) {
+    lastScheduledHour = timeinfo.tm_hour;
+    push(manualQ, mt, 1);   // auto scan node 1 every hour
+  }
+}
+
 /* ---------- Start Scan ---------- */
 void startScan(int node) {
   currentNode = node;
   state = SCANNING;
+  scanStartTime = millis();  
 
   Serial.print("[EXEC] Scanning Node ");
   Serial.println(node);
@@ -85,11 +114,9 @@ void handleSerial() {
 
   if (cmd.startsWith("EMERGENCY")) {
     push(emergencyQ, et, cmd.substring(10).toInt());
-    Serial.println("[EMERGENCY] Queued");
   }
   else if (cmd.startsWith("SCAN")) {
     push(manualQ, mt, cmd.substring(5).toInt());
-    Serial.println("[MANUAL] Queued");
   }
 }
 
@@ -101,8 +128,7 @@ void handleLoRa() {
   String msg="";
   while(LoRa.available()) msg+=(char)LoRa.read();
 
-  Serial.print("[RX] ");
-  Serial.println(msg);
+  Serial.println("[RX] " + msg);
 
   if (msg.startsWith("NODE")) {
     int node = msg.substring(5, msg.indexOf(',',5)).toInt();
