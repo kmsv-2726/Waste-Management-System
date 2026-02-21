@@ -4,12 +4,12 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-/* CONFIG */
-#define TOTAL_NODES 2
+/* ================= CONFIG ================= */
+#define TOTAL_NODES 3
 #define QUEUE_SIZE 5
 #define COMMAND_TIMEOUT 5000
 
-/* LORA */
+/* ================= LORA ================= */
 #define LORA_SS 5
 #define LORA_RST 27
 #define LORA_DIO0 26
@@ -17,18 +17,22 @@
 #define LORA_MISO 19
 #define LORA_MOSI 23
 
+/* ================= WIFI + NTP ================= */
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"pool.ntp.org",19800,60000);
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 60000);
 
-int emergencyQ[QUEUE_SIZE], eHead=0,eTail=0;
-int manualQ[QUEUE_SIZE], mHead=0,mTail=0;
-int schedQ[QUEUE_SIZE], sHead=0,sTail=0;
+/* ================= QUEUES ================= */
+int emergencyQ[QUEUE_SIZE], eHead=0, eTail=0;
+int manualQ[QUEUE_SIZE], mHead=0, mTail=0;
+int schedQ[QUEUE_SIZE], sHead=0, sTail=0;
 
+/* ================= STATE ================= */
 bool busy=false;
 int currentNode=-1;
 unsigned long commandStartTime=0;
 int lastHour=-1;
 
+/* ===================================================== */
 bool isEmpty(int h,int t){ return h==t; }
 
 void push(int q[],int &tail,int val){
@@ -42,12 +46,14 @@ int pop(int q[],int &head){
   return v;
 }
 
+/* ===================================================== */
 void setup(){
 
   Serial.begin(115200);
 
-  WiFi.begin("CSE23728","Mani@123");
+  WiFi.begin("YOUR_WIFI","YOUR_PASS");
   while(WiFi.status()!=WL_CONNECTED) delay(500);
+
   timeClient.begin();
 
   SPI.begin(LORA_SCK,LORA_MISO,LORA_MOSI,LORA_SS);
@@ -56,12 +62,14 @@ void setup(){
   LoRa.setSpreadingFactor(10);
   LoRa.enableCrc();
 
-  Serial.println("Gateway Ready");
+  Serial.println("Gateway JSON Ready");
 }
 
+/* ===================================================== */
 void loop(){
 
   timeClient.update();
+
   handleSerial();
   handleScheduler();
   handleLoRa();
@@ -69,6 +77,8 @@ void loop(){
   checkTimeout();
 }
 
+/* ===================================================== */
+/* ================= SERIAL ============================ */
 void handleSerial(){
 
   if(!Serial.available()) return;
@@ -76,14 +86,14 @@ void handleSerial(){
   String cmd=Serial.readStringUntil('\n');
   cmd.trim();
 
-  if(cmd.startsWith("em")){
+  if(cmd.startsWith("em"))
     push(emergencyQ,eTail,cmd.substring(2).toInt());
-  }
-  else if(cmd.startsWith("scan")){
+  else if(cmd.startsWith("scan"))
     push(manualQ,mTail,cmd.substring(4).toInt());
-  }
 }
 
+/* ===================================================== */
+/* ================= SCHEDULER ========================= */
 void handleScheduler(){
 
   int hourNow=timeClient.getHours();
@@ -95,6 +105,7 @@ void handleScheduler(){
   }
 }
 
+/* ===================================================== */
 void executeQueue(){
 
   if(busy) return;
@@ -117,17 +128,20 @@ void executeQueue(){
   commandStartTime=millis();
 }
 
+/* ===================================================== */
 void handleLoRa(){
 
   int size=LoRa.parsePacket();
   if(!size) return;
 
   String packet="";
-  while(LoRa.available()) packet+=(char)LoRa.read();
+  while(LoRa.available())
+    packet+=(char)LoRa.read();
 
   processPacket(packet);
 }
 
+/* ===================================================== */
 void processPacket(String packet){
 
   if(!packet.startsWith("NODE")) return;
@@ -145,6 +159,8 @@ void processPacket(String packet){
     parseAlert(packet,f3,node);
 }
 
+/* ===================================================== */
+/* ================= JSON BUILDER ====================== */
 void parseScan(String packet,int start,int node){
 
   String data=packet.substring(start+1);
@@ -156,6 +172,51 @@ void parseScan(String packet,int start,int node){
   int i5=data.indexOf(',',i4+1);
 
   int seq=data.substring(0,i1).toInt();
+  float temp=data.substring(i1+1,i2).toFloat();
+  float hum=data.substring(i2+1,i3).toFloat();
+  int gas=data.substring(i3+1,i4).toInt();
+  float battery=data.substring(i4+1,i5).toFloat();
+  String distances=data.substring(i5+1);
+
+  unsigned long timestamp=timeClient.getEpochTime();
+
+  String json="{";
+  json+="\"node\":"+String(node)+",";
+  json+="\"seq\":"+String(seq)+",";
+  json+="\"temperature\":"+String(temp)+",";
+  json+="\"humidity\":"+String(hum)+",";
+  json+="\"gas\":"+String(gas)+",";
+  json+="\"battery\":"+String(battery,2)+",";
+  json+="\"timestamp\":"+String(timestamp)+",";
+  json+="\"distances\":{";
+
+  int pos=0;
+  while(true){
+
+    int sep=distances.indexOf('|',pos);
+    String pair;
+
+    if(sep==-1){
+      pair=distances.substring(pos);
+    } else {
+      pair=distances.substring(pos,sep);
+    }
+
+    int colon=pair.indexOf(':');
+    String angle=pair.substring(0,colon);
+    String dist=pair.substring(colon+1);
+
+    json+="\""+angle+"\":"+dist;
+
+    if(sep==-1) break;
+    json+=",";
+    pos=sep+1;
+  }
+
+  json+="}}";
+
+  Serial.println("JSON OUTPUT:");
+  Serial.println(json);
 
   sendACK(node,seq);
 
@@ -163,15 +224,24 @@ void parseScan(String packet,int start,int node){
   currentNode=-1;
 }
 
+/* ===================================================== */
 void parseAlert(String packet,int start,int node){
 
   String type=packet.substring(start+1);
 
-  Serial.println("ALERT from Node "+String(node));
-  Serial.println("Type: "+type);
-  Serial.println("Time: "+String(timeClient.getEpochTime()));
+  unsigned long timestamp=timeClient.getEpochTime();
+
+  String json="{";
+  json+="\"node\":"+String(node)+",";
+  json+="\"alert\":\""+type+"\",";
+  json+="\"timestamp\":"+String(timestamp);
+  json+="}";
+
+  Serial.println("ALERT JSON:");
+  Serial.println(json);
 }
 
+/* ===================================================== */
 void sendACK(int node,int seq){
 
   LoRa.beginPacket();
@@ -182,6 +252,7 @@ void sendACK(int node,int seq){
   LoRa.endPacket();
 }
 
+/* ===================================================== */
 void checkTimeout(){
 
   if(!busy) return;
