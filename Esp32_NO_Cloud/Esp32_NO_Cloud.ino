@@ -46,7 +46,7 @@ void setup(){
 
   Serial.begin(115200);
 
-  WiFi.begin("YOUR_WIFI","YOUR_PASS");
+  WiFi.begin("CSE23728","Mani@123");
   while(WiFi.status()!=WL_CONNECTED) delay(500);
   timeClient.begin();
 
