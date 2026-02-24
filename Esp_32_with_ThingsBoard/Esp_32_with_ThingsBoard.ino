@@ -3,8 +3,18 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include <PubSubClient.h>
 
-/* ================= CONFIG ================= */
+/* ================= WIFI ================= */
+#define WIFI_SSID "CSE23728"
+#define WIFI_PASS "Mani@123"
+
+/* ================= THINGSBOARD ================= */
+#define TB_SERVER "thingsboard.cloud"
+#define TB_PORT 1883
+#define TB_TOKEN "YOUR_DEVICE_ACCESS_TOKEN"
+
+/* ================= NETWORK CONFIG ================= */
 #define TOTAL_NODES 3
 #define QUEUE_SIZE 5
 #define COMMAND_TIMEOUT 5000
@@ -17,14 +27,16 @@
 #define LORA_MISO 19
 #define LORA_MOSI 23
 
-/* ================= WIFI + NTP ================= */
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 60000);
 
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 /* ================= QUEUES ================= */
-int emergencyQ[QUEUE_SIZE], eHead=0, eTail=0;
-int manualQ[QUEUE_SIZE], mHead=0, mTail=0;
-int schedQ[QUEUE_SIZE], sHead=0, sTail=0;
+int emergencyQ[QUEUE_SIZE], eHead=0,eTail=0;
+int manualQ[QUEUE_SIZE], mHead=0,mTail=0;
+int schedQ[QUEUE_SIZE], sHead=0,sTail=0;
 
 /* ================= STATE ================= */
 bool busy=false;
@@ -32,7 +44,7 @@ int currentNode=-1;
 unsigned long commandStartTime=0;
 int lastHour=-1;
 
-/* ===================================================== */
+/* ================= QUEUE UTILS ================= */
 bool isEmpty(int h,int t){ return h==t; }
 
 void push(int q[],int &tail,int val){
@@ -46,13 +58,47 @@ int pop(int q[],int &head){
   return v;
 }
 
-/* ===================================================== */
+/* ================= MQTT RECONNECT ================= */
+void reconnectMQTT(){
+  while(!client.connected()){
+    if(client.connect("GatewayClient",TB_TOKEN,NULL)){
+      client.subscribe("v1/devices/me/rpc/request/+");
+    } else {
+      delay(2000);
+    }
+  }
+}
+
+/* ================= RPC CALLBACK ================= */
+void rpcCallback(char* topic, byte* payload, unsigned int length){
+
+  String msg="";
+  for(unsigned int i=0;i<length;i++)
+    msg+=(char)payload[i];
+
+  if(msg.indexOf("scan")!=-1){
+    int idx=msg.indexOf("node");
+    int node=msg.substring(idx+6).toInt();
+    push(manualQ,mTail,node);
+  }
+
+  if(msg.indexOf("emergency")!=-1){
+    int idx=msg.indexOf("node");
+    int node=msg.substring(idx+6).toInt();
+    push(emergencyQ,eTail,node);
+  }
+}
+
+/* ================= SETUP ================= */
 void setup(){
 
   Serial.begin(115200);
 
-  WiFi.begin("YOUR_WIFI","YOUR_PASS");
+  WiFi.begin(WIFI_SSID,WIFI_PASS);
   while(WiFi.status()!=WL_CONNECTED) delay(500);
+
+  client.setServer(TB_SERVER,TB_PORT);
+  client.setCallback(rpcCallback);
 
   timeClient.begin();
 
@@ -62,38 +108,25 @@ void setup(){
   LoRa.setSpreadingFactor(10);
   LoRa.enableCrc();
 
-  Serial.println("Gateway JSON Ready");
+  Serial.println("FULL CLOUD QUEUE GATEWAY READY");
 }
 
-/* ===================================================== */
+/* ================= LOOP ================= */
 void loop(){
 
+  if(!client.connected())
+    reconnectMQTT();
+
+  client.loop();
   timeClient.update();
 
-  handleSerial();
   handleScheduler();
   handleLoRa();
   executeQueue();
   checkTimeout();
 }
 
-/* ===================================================== */
-/* ================= SERIAL ============================ */
-void handleSerial(){
-
-  if(!Serial.available()) return;
-
-  String cmd=Serial.readStringUntil('\n');
-  cmd.trim();
-
-  if(cmd.startsWith("em"))
-    push(emergencyQ,eTail,cmd.substring(2).toInt());
-  else if(cmd.startsWith("scan"))
-    push(manualQ,mTail,cmd.substring(4).toInt());
-}
-
-/* ===================================================== */
-/* ================= SCHEDULER ========================= */
+/* ================= SCHEDULER ================= */
 void handleScheduler(){
 
   int hourNow=timeClient.getHours();
@@ -105,7 +138,7 @@ void handleScheduler(){
   }
 }
 
-/* ===================================================== */
+/* ================= EXECUTION ENGINE ================= */
 void executeQueue(){
 
   if(busy) return;
@@ -128,7 +161,7 @@ void executeQueue(){
   commandStartTime=millis();
 }
 
-/* ===================================================== */
+/* ================= LORA RECEIVE ================= */
 void handleLoRa(){
 
   int size=LoRa.parsePacket();
@@ -141,7 +174,7 @@ void handleLoRa(){
   processPacket(packet);
 }
 
-/* ===================================================== */
+/* ================= PACKET PROCESSOR ================= */
 void processPacket(String packet){
 
   if(!packet.startsWith("NODE")) return;
@@ -159,8 +192,7 @@ void processPacket(String packet){
     parseAlert(packet,f3,node);
 }
 
-/* ===================================================== */
-/* ================= JSON BUILDER ====================== */
+/* ================= SCAN PARSER ================= */
 void parseScan(String packet,int start,int node){
 
   String data=packet.substring(start+1);
@@ -176,7 +208,6 @@ void parseScan(String packet,int start,int node){
   float hum=data.substring(i2+1,i3).toFloat();
   int gas=data.substring(i3+1,i4).toInt();
   float battery=data.substring(i4+1,i5).toFloat();
-  String distances=data.substring(i5+1);
 
   unsigned long timestamp=timeClient.getEpochTime();
 
@@ -187,36 +218,10 @@ void parseScan(String packet,int start,int node){
   json+="\"humidity\":"+String(hum)+",";
   json+="\"gas\":"+String(gas)+",";
   json+="\"battery\":"+String(battery,2)+",";
-  json+="\"timestamp\":"+String(timestamp)+",";
-  json+="\"distances\":{";
+  json+="\"timestamp\":"+String(timestamp);
+  json+="}";
 
-  int pos=0;
-  while(true){
-
-    int sep=distances.indexOf('|',pos);
-    String pair;
-
-    if(sep==-1){
-      pair=distances.substring(pos);
-    } else {
-      pair=distances.substring(pos,sep);
-    }
-
-    int colon=pair.indexOf(':');
-    String angle=pair.substring(0,colon);
-    String dist=pair.substring(colon+1);
-
-    json+="\""+angle+"\":"+dist;
-
-    if(sep==-1) break;
-    json+=",";
-    pos=sep+1;
-  }
-
-  json+="}}";
-
-  Serial.println("JSON OUTPUT:");
-  Serial.println(json);
+  client.publish("v1/devices/me/telemetry",json.c_str());
 
   sendACK(node,seq);
 
@@ -224,7 +229,7 @@ void parseScan(String packet,int start,int node){
   currentNode=-1;
 }
 
-/* ===================================================== */
+/* ================= ALERT PARSER ================= */
 void parseAlert(String packet,int start,int node){
 
   String type=packet.substring(start+1);
@@ -237,11 +242,10 @@ void parseAlert(String packet,int start,int node){
   json+="\"timestamp\":"+String(timestamp);
   json+="}";
 
-  Serial.println("ALERT JSON:");
-  Serial.println(json);
+  client.publish("v1/devices/me/telemetry",json.c_str());
 }
 
-/* ===================================================== */
+/* ================= ACK ================= */
 void sendACK(int node,int seq){
 
   LoRa.beginPacket();
@@ -252,7 +256,7 @@ void sendACK(int node,int seq){
   LoRa.endPacket();
 }
 
-/* ===================================================== */
+/* ================= TIMEOUT ================= */
 void checkTimeout(){
 
   if(!busy) return;
