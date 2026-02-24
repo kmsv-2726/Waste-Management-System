@@ -76,17 +76,42 @@ void rpcCallback(char* topic, byte* payload, unsigned int length){
   for(unsigned int i=0;i<length;i++)
     msg+=(char)payload[i];
 
+  // Extract request ID from topic
+  String topicStr = String(topic);
+  int lastSlash = topicStr.lastIndexOf('/');
+  String requestId = topicStr.substring(lastSlash + 1);
+
+  bool accepted = false;
+  int node = -1;
+
   if(msg.indexOf("scan")!=-1){
-    int idx=msg.indexOf("node");
-    int node=msg.substring(idx+6).toInt();
-    push(manualQ,mTail,node);
+    int idx = msg.indexOf("node");
+    node = msg.substring(idx+6).toInt();
+    push(manualQ, mTail, node);
+    accepted = true;
   }
 
   if(msg.indexOf("emergency")!=-1){
-    int idx=msg.indexOf("node");
-    int node=msg.substring(idx+6).toInt();
-    push(emergencyQ,eTail,node);
+    int idx = msg.indexOf("node");
+    node = msg.substring(idx+6).toInt();
+    push(emergencyQ, eTail, node);
+    accepted = true;
   }
+
+  // Build RPC response
+  String response = "{";
+  response += "\"status\":\"";
+  response += (accepted ? "accepted" : "rejected");
+  response += "\",";
+  response += "\"node\":";
+  response += String(node);
+  response += ",\"queued\":";
+  response += (accepted ? "true" : "false");
+  response += "}";
+
+  // Publish response to correct TB topic
+  String responseTopic = "v1/devices/me/rpc/response/" + requestId;
+  client.publish(responseTopic.c_str(), response.c_str());
 }
 
 /* ================= SETUP ================= */
