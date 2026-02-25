@@ -43,6 +43,39 @@ bool busy=false;
 int currentNode=-1;
 unsigned long commandStartTime=0;
 int lastHour=-1;
+/* ================= ADR ================= */
+int nodeSF[TOTAL_NODES + 1] = {0};  // store current SF per node
+bool adrEnabled = true;
+void adjustDataRate(int node, int rssi){
+
+  if(!adrEnabled) return;
+
+  int targetSF;
+
+  if(rssi > -70)
+    targetSF = 7;
+  else if(rssi > -85)
+    targetSF = 9;
+  else
+    targetSF = 12;
+
+  if(nodeSF[node] == targetSF)
+    return;
+
+  Serial.print("ADR changing Node ");
+  Serial.print(node);
+  Serial.print(" to SF ");
+  Serial.println(targetSF);
+
+  LoRa.beginPacket();
+  LoRa.print("CMD,");
+  LoRa.print(node);
+  LoRa.print(",SF,");
+  LoRa.print(targetSF);
+  LoRa.endPacket();
+
+  nodeSF[node] = targetSF;
+}
 
 /* ================= QUEUE UTILS ================= */
 bool isEmpty(int h,int t){ return h==t; }
@@ -189,18 +222,20 @@ void executeQueue(){
 /* ================= LORA RECEIVE ================= */
 void handleLoRa(){
 
-  int size=LoRa.parsePacket();
-  if(!size) return;
+int size = LoRa.parsePacket();
+if(!size) return;
 
-  String packet="";
-  while(LoRa.available())
-    packet+=(char)LoRa.read();
+int rssi = LoRa.packetRssi();
 
-  processPacket(packet);
+String packet="";
+while(LoRa.available())
+  packet+=(char)LoRa.read();
+
+processPacket(packet, rssi);
 }
 
 /* ================= PACKET PROCESSOR ================= */
-void processPacket(String packet){
+void processPacket(String packet, int rssi){
 
   if(!packet.startsWith("NODE")) return;
 
@@ -212,13 +247,13 @@ void processPacket(String packet){
   String protocol=packet.substring(f2+1,f3);
 
   if(protocol=="SCANv2")
-    parseScan(packet,f3,node);
+    parseScan(packet,f3,node,,rssi);
   else if(protocol=="ALERTv1")
-    parseAlert(packet,f3,node);
+    parseAlert(packet,f3,node,rssi);
 }
 
 /* ================= SCAN PARSER ================= */
-void parseScan(String packet,int start,int node){
+void parseScan(String packet,int start,int node,int rssi){
 
   String data=packet.substring(start+1);
 
@@ -247,7 +282,7 @@ void parseScan(String packet,int start,int node){
   json+="}";
 
   client.publish("v1/devices/me/telemetry",json.c_str());
-
+  adjustDataRate(node, rssi);
   sendACK(node,seq);
 
   busy=false;

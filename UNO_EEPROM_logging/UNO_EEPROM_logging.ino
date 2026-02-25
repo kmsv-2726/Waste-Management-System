@@ -114,13 +114,32 @@ void handleLoRaPacket() {
   if (!packetSize) return;
 
   String msg="";
-  while(LoRa.available()) msg+=(char)LoRa.read();
+  while(LoRa.available())
+    msg += (char)LoRa.read();
 
-  if (msg == "CMD,SCAN," + String(NODE_ID)) {
+  /* ---------- SCAN COMMAND ---------- */
+  if (msg == "CMD," + String(NODE_ID) + ",SCAN") {
     startScan();
   }
 
-  if (msg.startsWith("ACK")) {
+  /* ---------- SF UPDATE (ADR) ---------- */
+  else if (msg.startsWith("CMD," + String(NODE_ID) + ",SF,")) {
+
+    int lastComma = msg.lastIndexOf(',');
+    int newSF = msg.substring(lastComma+1).toInt();
+
+    if(newSF >= 7 && newSF <= 12){
+
+      Serial.print("Updating SF to: ");
+      Serial.println(newSF);
+
+      LoRa.setSpreadingFactor(newSF);
+    }
+  }
+
+  /* ---------- ACK ---------- */
+  else if (msg.startsWith("ACK")) {
+
     logger.markDelivered(lastSentIndex);
     waitingAck = false;
   }
