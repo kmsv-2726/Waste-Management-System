@@ -33,6 +33,7 @@
 
 #define SERVO_INTERVAL 300
 #define SCAN_FLAG_ADDR 500
+#define SF_EEPROM_ADDR 510
 
 /* ---------- Globals ---------- */
 volatile bool gasTriggered = false;
@@ -77,7 +78,17 @@ void setup() {
   LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
   if (!LoRa.begin(433E6)) while (1);
 
-  LoRa.setSpreadingFactor(10);
+  int savedSF = EEPROM.read(SF_EEPROM_ADDR);
+
+  if(savedSF >= 7 && savedSF <= 12){
+    LoRa.setSpreadingFactor(savedSF);
+    Serial.print("Loaded SF from EEPROM: ");
+    Serial.println(savedSF);
+  } else {
+    LoRa.setSpreadingFactor(10);
+    EEPROM.write(SF_EEPROM_ADDR, 10);
+    Serial.println("Default SF set to 10");
+}
   LoRa.enableCrc();
   attachInterrupt(digitalPinToInterrupt(LORA_DIO0), loraISR, RISING);
 
