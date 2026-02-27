@@ -132,7 +132,6 @@ void handleLoRaPacket() {
   if (msg == "CMD," + String(NODE_ID) + ",SCAN") {
     startScan();
   }
-
   /* ---------- SF UPDATE (ADR) ---------- */
   else if (msg.startsWith("CMD," + String(NODE_ID) + ",SF,")) {
 
@@ -145,6 +144,8 @@ void handleLoRaPacket() {
       Serial.println(newSF);
 
       LoRa.setSpreadingFactor(newSF);
+      EEPROM.write(SF_EEPROM_ADDR, newSF);
+      Serial.println("SF saved to EEPROM");
     }
   }
 

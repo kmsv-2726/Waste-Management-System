@@ -10,7 +10,7 @@ public:
   bool isReady();
   int getDistance();
 
-private:
+public:
   uint8_t _trigPin;
   uint8_t _echoPin;
 

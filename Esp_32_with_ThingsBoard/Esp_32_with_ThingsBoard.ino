@@ -12,7 +12,7 @@
 /* ================= THINGSBOARD ================= */
 #define TB_SERVER "thingsboard.cloud"
 #define TB_PORT 1883
-#define TB_TOKEN "YOUR_DEVICE_ACCESS_TOKEN"
+#define TB_TOKEN "mDbtWAR119hFXVd8iSZ8"
 
 /* ================= NETWORK CONFIG ================= */
 #define TOTAL_NODES 3
@@ -43,9 +43,12 @@ bool busy=false;
 int currentNode=-1;
 unsigned long commandStartTime=0;
 int lastHour=-1;
+int gatewaySF = 10;   // Global Gateway Spreading Factor
+
 /* ================= ADR ================= */
-int nodeSF[TOTAL_NODES + 1] = {0};  // store current SF per node
+int nodeSF[TOTAL_NODES + 1] = {0};
 bool adrEnabled = true;
+
 void adjustDataRate(int node, int rssi){
 
   if(!adrEnabled) return;
@@ -61,11 +64,6 @@ void adjustDataRate(int node, int rssi){
 
   if(nodeSF[node] == targetSF)
     return;
-
-  Serial.print("ADR changing Node ");
-  Serial.print(node);
-  Serial.print(" to SF ");
-  Serial.println(targetSF);
 
   LoRa.beginPacket();
   LoRa.print("CMD,");
@@ -109,7 +107,6 @@ void rpcCallback(char* topic, byte* payload, unsigned int length){
   for(unsigned int i=0;i<length;i++)
     msg+=(char)payload[i];
 
-  // Extract request ID from topic
   String topicStr = String(topic);
   int lastSlash = topicStr.lastIndexOf('/');
   String requestId = topicStr.substring(lastSlash + 1);
@@ -131,7 +128,6 @@ void rpcCallback(char* topic, byte* payload, unsigned int length){
     accepted = true;
   }
 
-  // Build RPC response
   String response = "{";
   response += "\"status\":\"";
   response += (accepted ? "accepted" : "rejected");
@@ -142,7 +138,6 @@ void rpcCallback(char* topic, byte* payload, unsigned int length){
   response += (accepted ? "true" : "false");
   response += "}";
 
-  // Publish response to correct TB topic
   String responseTopic = "v1/devices/me/rpc/response/" + requestId;
   client.publish(responseTopic.c_str(), response.c_str());
 }
@@ -162,7 +157,11 @@ void setup(){
 
   SPI.begin(LORA_SCK,LORA_MISO,LORA_MOSI,LORA_SS);
   LoRa.setPins(LORA_SS,LORA_RST,LORA_DIO0);
-  LoRa.begin(433E6);
+
+  if (!LoRa.begin(433E6)) {
+    while (1);
+  }
+
   LoRa.setSpreadingFactor(10);
   LoRa.enableCrc();
 
@@ -177,7 +176,7 @@ void loop(){
 
   client.loop();
   timeClient.update();
-
+  handleSerial();
   handleScheduler();
   handleLoRa();
   executeQueue();
@@ -196,6 +195,86 @@ void handleScheduler(){
   }
 }
 
+/* ================= SERIAL COMMAND HANDLER ================= */
+void handleSerial(){
+
+  if(!Serial.available()) return;
+
+  String cmd = Serial.readStringUntil('\n');
+  cmd.trim();
+
+  /* ---------- MANUAL SCAN ---------- */
+  if(cmd.startsWith("scan")){
+    int node = cmd.substring(5).toInt();
+    push(manualQ, mTail, node);
+    Serial.println("Manual scan queued");
+  }
+
+  /* ---------- EMERGENCY ---------- */
+  else if(cmd.startsWith("emergency")){
+    int node = cmd.substring(10).toInt();
+    push(emergencyQ, eTail, node);
+    Serial.println("Emergency scan queued");
+  }
+
+  /* ---------- ADR CONTROL ---------- */
+  else if(cmd == "adr on"){
+    adrEnabled = true;
+    Serial.println("ADR Enabled");
+  }
+
+  else if(cmd == "adr off"){
+    adrEnabled = false;
+    Serial.println("ADR Disabled");
+  }
+
+  /* ---------- SHOW GATEWAY SF ---------- */
+  else if(cmd == "sf"){
+    Serial.print("Gateway SF: ");
+    Serial.println(gatewaySF);
+  }
+
+  /* ---------- SET GATEWAY SF ---------- */
+  else if(cmd.startsWith("setsf")){
+    int newSF = cmd.substring(6).toInt();
+
+    if(newSF >= 7 && newSF <= 12){
+      gatewaySF = newSF;
+      LoRa.setSpreadingFactor(gatewaySF);
+
+      Serial.print("Gateway SF updated to: ");
+      Serial.println(gatewaySF);
+    }
+    else{
+      Serial.println("Invalid SF (7–12 only)");
+    }
+  }
+
+  /* ---------- SHOW NODE SF TABLE ---------- */
+  else if(cmd == "nodesf"){
+    Serial.println("Node SF Table:");
+    for(int i=1;i<=TOTAL_NODES;i++){
+      Serial.print("Node ");
+      Serial.print(i);
+      Serial.print(" -> SF: ");
+      Serial.println(nodeSF[i]);
+    }
+  }
+
+  /* ---------- STATUS ---------- */
+  else if(cmd == "status"){
+    Serial.println("------ GATEWAY STATUS ------");
+    Serial.print("Busy: "); Serial.println(busy);
+    Serial.print("Current Node: "); Serial.println(currentNode);
+    Serial.print("Gateway SF: "); Serial.println(gatewaySF);
+    Serial.print("ADR Enabled: "); Serial.println(adrEnabled);
+    Serial.println("----------------------------");
+  }
+
+  else{
+    Serial.println("Unknown Command");
+  }
+}
 /* ================= EXECUTION ENGINE ================= */
 void executeQueue(){
 
@@ -222,16 +301,16 @@ void executeQueue(){
 /* ================= LORA RECEIVE ================= */
 void handleLoRa(){
 
-int size = LoRa.parsePacket();
-if(!size) return;
+  int size = LoRa.parsePacket();
+  if(!size) return;
 
-int rssi = LoRa.packetRssi();
+  int rssi = LoRa.packetRssi();
 
-String packet="";
-while(LoRa.available())
-  packet+=(char)LoRa.read();
+  String packet="";
+  while(LoRa.available())
+    packet+=(char)LoRa.read();
 
-processPacket(packet, rssi);
+  processPacket(packet, rssi);
 }
 
 /* ================= PACKET PROCESSOR ================= */
@@ -247,7 +326,7 @@ void processPacket(String packet, int rssi){
   String protocol=packet.substring(f2+1,f3);
 
   if(protocol=="SCANv2")
-    parseScan(packet,f3,node,,rssi);
+    parseScan(packet,f3,node,rssi);
   else if(protocol=="ALERTv1")
     parseAlert(packet,f3,node,rssi);
 }
@@ -269,7 +348,7 @@ void parseScan(String packet,int start,int node,int rssi){
   int gas=data.substring(i3+1,i4).toInt();
   float battery=data.substring(i4+1,i5).toFloat();
 
-  unsigned long timestamp=timeClient.getEpochTime();
+  unsigned long timestamp = timeClient.getEpochTime() * 1000UL;
 
   String json="{";
   json+="\"node\":"+String(node)+",";
@@ -278,10 +357,12 @@ void parseScan(String packet,int start,int node,int rssi){
   json+="\"humidity\":"+String(hum)+",";
   json+="\"gas\":"+String(gas)+",";
   json+="\"battery\":"+String(battery,2)+",";
-  json+="\"timestamp\":"+String(timestamp);
+  json+="\"rssi\":"+String(rssi)+",";
+  json+="\"ts\":"+String(timestamp);
   json+="}";
 
   client.publish("v1/devices/me/telemetry",json.c_str());
+
   adjustDataRate(node, rssi);
   sendACK(node,seq);
 
@@ -290,16 +371,17 @@ void parseScan(String packet,int start,int node,int rssi){
 }
 
 /* ================= ALERT PARSER ================= */
-void parseAlert(String packet,int start,int node){
+void parseAlert(String packet,int start,int node,int rssi){
 
   String type=packet.substring(start+1);
 
-  unsigned long timestamp=timeClient.getEpochTime();
+  unsigned long timestamp = timeClient.getEpochTime() * 1000UL;
 
   String json="{";
   json+="\"node\":"+String(node)+",";
   json+="\"alert\":\""+type+"\",";
-  json+="\"timestamp\":"+String(timestamp);
+  json+="\"rssi\":"+String(rssi)+",";
+  json+="\"ts\":"+String(timestamp);
   json+="}";
 
   client.publish("v1/devices/me/telemetry",json.c_str());
