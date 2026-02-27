@@ -1,0 +1,2881 @@
+{
+  "title": "Waste Management Administration",
+  "image": null,
+  "mobileHide": false,
+  "mobileOrder": null,
+  "configuration": {
+    "description": "",
+    "widgets": {
+      "ad8020a2-53fd-8334-c94e-2a7af3774780": {
+        "type": "latest",
+        "sizeX": 8.5,
+        "sizeY": 6,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": null,
+              "deviceId": "8204cf40-1246-11f1-b5a7-93241ed57bdc",
+              "filterId": "b57ed975-3305-c009-023a-bbb9d8fd36ee",
+              "dataKeys": [
+                {
+                  "name": "latitude",
+                  "type": "attribute",
+                  "label": "latitude",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "longitude",
+                  "type": "attribute",
+                  "label": "longitude",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "active",
+                  "type": "attribute",
+                  "label": "active",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "isFull",
+                  "type": "attribute",
+                  "label": "isFull",
+                  "color": "#ffc107",
+                  "settings": {}
+                },
+                {
+                  "name": "isLowBattery",
+                  "type": "attribute",
+                  "label": "isLowBattery",
+                  "color": "#607d8b",
+                  "settings": {}
+                },
+                {
+                  "name": "fullLevel",
+                  "type": "timeseries",
+                  "label": "fullLevel",
+                  "color": "#9c27b0",
+                  "settings": {}
+                },
+                {
+                  "name": "batteryLevel",
+                  "type": "timeseries",
+                  "label": "batteryLevel",
+                  "color": "#8bc34a",
+                  "settings": {}
+                },
+                {
+                  "name": "address",
+                  "type": "attribute",
+                  "label": "address",
+                  "color": "#3f51b5",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "provider": "openstreet-map",
+            "gmApiKey": "AIzaSyDoEx2kaGz3PxwbI9T7ccTSg5xjdw8Nw8Q",
+            "gmDefaultMapType": "roadmap",
+            "mapProvider": "CartoDB.Positron",
+            "useCustomProvider": false,
+            "customProviderTileUrl": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "mapProviderHere": "HERE.normalDay",
+            "credentials": {
+              "app_id": "AhM6TzD9ThyK78CT3ptx",
+              "app_code": "p6NPiITB3Vv0GMUFnkLOOg"
+            },
+            "mapImageUrl": "tb-image;/api/images/system/here_map_system_widget_map_image.svg",
+            "tmApiKey": "84d6d83e0e51e481e50454ccbe8986b",
+            "tmDefaultMapType": "roadmap",
+            "latKeyName": "latitude",
+            "lngKeyName": "longitude",
+            "xPosKeyName": "xPos",
+            "yPosKeyName": "yPos",
+            "defaultZoomLevel": 0,
+            "defaultCenterPosition": "0,0",
+            "disableScrollZooming": false,
+            "disableDoubleClickZooming": false,
+            "disableZoomControl": false,
+            "fitMapBounds": true,
+            "useDefaultCenterPosition": false,
+            "mapPageSize": 16384,
+            "markerOffsetX": 0.5,
+            "markerOffsetY": 1,
+            "posFunction": "return {x: origXPos, y: origYPos};",
+            "draggableMarker": false,
+            "showLabel": false,
+            "useLabelFunction": false,
+            "label": "${entityName}",
+            "showTooltip": true,
+            "showTooltipAction": "click",
+            "autocloseTooltip": true,
+            "useTooltipFunction": true,
+            "tooltipPattern": "<b>${entityName}</b><br/><br/><b>Latitude:</b> ${latitude:7}<br/><b>Longitude:</b> ${longitude:7}",
+            "tooltipFunction": "const fullLevel = processValue(data.fullLevel, 0);\nconst batteryLevel = processValue(data.batteryLevel, 0);\nconst isFull = data.isFull && data.isFull !== 'false';\nconst isLowBattery = data.isLowBattery && data.isLowBattery !== 'false';\nconst fullColor = isFull ? '#D12730' : '#29313C';\nconst lowBatteryColor = isLowBattery ? '#D12730' : '#29313C';\nconst isActive = data.active === 'true';\nconst status = isActive ? 'Online' : 'Offline';\nconst color = isActive ? '#3AA94D' : '#C42F37';\nconst bgColor = isActive ? 'rgba(58, 169, 77, 0.08)' : 'rgba(196, 47, 55, 0.08)';\nconst address = data.address ? data.address : 'N/A';\nconst lastUpdate = (data['batteryLevel|ts'] || data['fullLevel|ts']) ? moment(Math.max(data['batteryLevel|ts'], data['fullLevel|ts'])).format('D MMM YYYY HH:mm') : 'N/A';\n\nreturn '<div style=\"display:flex;flex-direction:column;margin-bottom:8px;font-family:\\'Roboto\\';font-weight:500;font-size:16px;line-height:24px;letter-spacing:0.25px;color:#29313C\">' +\n            '<div>Sensor ${entityName}</div>' +\n            '<div style=\"width: 100%;border-bottom:1px solid rgba(0, 0, 0, 0.12);margin:12px 0;\"></div>' +\n            '<div style=\"display:flex;flex-direction:row;align-items:baseline;margin-bottom:9px;\">' +\n                '<div style=\"font-size:13px;line-height:16px;font-weight:500;color:rgba(0, 0, 0, 0.38);width:100px\">Address</div>' +\n                '<div style=\"font-size:14px;line-height:20px;font-weight:500;color:#29313C;letter-spacing:0.25px\">'+ address +'</div>' +\n            '</div>' +\n            '<div style=\"display:flex;flex-direction:row;align-items:baseline;margin-bottom:9px;\">' +\n                '<div style=\"font-size:13px;line-height:16px;font-weight:500;color:rgba(0, 0, 0, 0.38);width:100px\">Fullness</div>' +\n                '<div style=\"color:'+ fullColor +';font-size:14px;line-height:20px;font-weight:500;letter-spacing:0.25px\">'+ fullLevel +'%</div>' +\n            '</div>' +\n            '<div style=\"display:flex;flex-direction:row;align-items:baseline;margin-bottom:9px;\">' +\n                '<div style=\"font-size:13px;line-height:16px;font-weight:500;color:rgba(0, 0, 0, 0.38);width:100px\">Battery level</div>' +\n                '<div style=\"color:'+ lowBatteryColor +';font-size:14px;line-height:20px;font-weight:500;letter-spacing:0.25px\">'+ batteryLevel +'%</div>' +\n            '</div>' +\n            '<div style=\"display:flex;flex-direction:row;align-items:baseline;margin-bottom:9px;\">' +\n                '<div style=\"font-size:13px;line-height:16px;font-weight:500;color:rgba(0, 0, 0, 0.38);width:100px\">Connection</div>' +\n                '<div style=\"font-size:14px;width:fit-content;padding:4px 8px;font-weight:500;line-height:20px;letter-spacing:0.25px;border-radius:8px;color:'+ color +';background-color:'+ bgColor +'\">' + status + '</div>' +\n            '</div>' +\n            '<div style=\"display:flex;flex-direction:row;align-items:baseline;margin-bottom:13px;\">' +\n                '<div style=\"font-size:13px;line-height:16px;font-weight:500;color:rgba(0, 0, 0, 0.38);width:100px\">Last update</div>' +\n                '<div style=\"font-size:14px;line-height:20px;font-weight:500;color:#29313C;letter-spacing:0.25px\">'+ lastUpdate +'</div>' +\n            '</div>' +\n       '</div>' +\n       '<div style=\"text-align: center\">' +\n            '<link-act name=\"sensor-details\">Details ></link-act>' +\n       '</div>';\n\nfunction isNumber(value) {\n    return (typeof value === 'number' && isFinite(value));\n}\n\nfunction processValue(value, dec) {\n    value = parseFloat(value);\n    if (isNumber(value)) {\n        if (isNumber(dec)) {\n            value = parseFloat(value.toFixed(dec));\n        }\n        return value;\n    } else {\n        return 'N/A';\n    }\n}",
+            "tooltipOffsetX": 0,
+            "tooltipOffsetY": -1,
+            "color": "#fe7569",
+            "useColorFunction": false,
+            "useMarkerImageFunction": true,
+            "markerImageSize": 34,
+            "markerImageFunction": "let image = images[0];\nconst isFull = data.isFull && data.isFull !== 'false';\nconst isLowBattery = data.isLowBattery && data.isLowBattery !== 'false';\nconst isActive = data.active && data.active !== 'false';\n\nif (!isActive) {\n    image = images[3];\n} else if (isFull) {\n    image = images[1];\n} else if (isLowBattery) {\n    image = images[2];\n}\n\nreturn {\n    url: image,\n    size: 28\n};\n",
+            "markerImages": [
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_0.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_1.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_2.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_3.svg"
+            ],
+            "showPolygon": false,
+            "polygonKeyName": "perimeter",
+            "editablePolygon": false,
+            "showPolygonLabel": false,
+            "usePolygonLabelFunction": false,
+            "polygonLabel": "${entityName}",
+            "showPolygonTooltip": false,
+            "showPolygonTooltipAction": "click",
+            "autoClosePolygonTooltip": true,
+            "usePolygonTooltipFunction": false,
+            "polygonTooltipPattern": "<b>${entityName}</b><br/><br/><b>TimeStamp:</b> ${ts:7}",
+            "polygonColor": "#3388ff",
+            "polygonOpacity": 0.2,
+            "usePolygonColorFunction": false,
+            "polygonStrokeColor": "#3388ff",
+            "polygonStrokeOpacity": 1,
+            "polygonStrokeWeight": 3,
+            "usePolygonStrokeColorFunction": false,
+            "showCircle": false,
+            "circleKeyName": "perimeter",
+            "editableCircle": false,
+            "showCircleLabel": false,
+            "useCircleLabelFunction": false,
+            "circleLabel": "${entityName}",
+            "showCircleTooltip": false,
+            "showCircleTooltipAction": "click",
+            "autoCloseCircleTooltip": true,
+            "useCircleTooltipFunction": false,
+            "circleTooltipPattern": "<b>${entityName}</b><br/><br/><b>TimeStamp:</b> ${ts:7}",
+            "circleFillColor": "#3388ff",
+            "circleFillColorOpacity": 0.2,
+            "useCircleFillColorFunction": false,
+            "circleStrokeColor": "#3388ff",
+            "circleStrokeOpacity": 1,
+            "circleStrokeWeight": 3,
+            "useCircleStrokeColorFunction": false,
+            "useClusterMarkers": true,
+            "zoomOnClick": true,
+            "maxClusterRadius": 80,
+            "animate": true,
+            "spiderfyOnMaxZoom": false,
+            "showCoverageOnHover": true,
+            "chunkedLoading": false,
+            "removeOutsideVisibleBounds": true,
+            "useIconCreateFunction": true,
+            "clusterMarkerFunction": "let isAlarm = false;\nfor(let i=0; i < data.length; i++) {\n    if (data[i].isFull === 'true' || data[i].isLowBattery === 'true' || data[i].active === 'false') {\n        isAlarm = true;\n        break;\n    }\n}\n\nreturn isAlarm ? '#fbac36' : '#73c65e';"
+          },
+          "title": "Bins Map",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "widgetStyle": {},
+          "actions": {
+            "tooltipAction": [
+              {
+                "name": "sensor-details",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "openDashboardState",
+                "targetDashboardStateId": "selected_bin",
+                "setEntityId": true,
+                "stateEntityParamName": null,
+                "openRightLayout": false,
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "e38e7a79-6238-7bbd-6bc2-5b90a3dfd660"
+              }
+            ]
+          },
+          "showTitleIcon": false,
+          "titleTooltip": "",
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "ad8020a2-53fd-8334-c94e-2a7af3774780",
+        "typeFullFqn": "system.maps_v2.openstreetmap"
+      },
+      "6743d611-3f49-5caf-4e28-c06eeebbe225": {
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entityCount",
+              "name": null,
+              "entityAliasId": "6ee2c775-15f1-e7dc-a368-12a263215530",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "count",
+                  "type": "count",
+                  "label": "count",
+                  "color": "#2196f3",
+                  "settings": {}
+                }
+              ]
+            },
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "bbd8598b-83a5-5da8-43d3-4fd989919131",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "displayFullBins",
+                  "type": "attribute",
+                  "label": "displayFullBins",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "displayLowBatteryBins",
+                  "type": "attribute",
+                  "label": "displayLowBatteryBins",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "displayOfflineBins",
+                  "type": "attribute",
+                  "label": "displayOfflineBins",
+                  "color": "#ffc107",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextPattern": "# Markdown/HTML card \\n - **Current entity**: **${entityName}**. \\n - **Current value**: **${Random}**.",
+            "markdownTextFunction": "let value = '-';\nlet isCardSelected = false;\nif (data.length) {\n    value = data[0].count;\n    if (data[1]) {\n        const displayFullBins = data[1].displayFullBins && data[1].displayFullBins !== 'false';\n        const displayLowBatteryBins = data[1].displayLowBatteryBins && data[1].displayLowBatteryBins !== 'false';\n        const displayOfflineBins = data[1].displayOfflineBins && data[1].displayOfflineBins !== 'false';\n        isCardSelected = !displayFullBins && !displayLowBatteryBins && !displayOfflineBins;\n    }\n}\n\nconst icon = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMTk4MDM4IiByeD0iNCIvPjxwYXRoIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0ibTEzLjI0OCAxOS42MzggMy44NDMgNC42MzJMMjguMzIgMTAuMzc0Yy44NC0uOTQgMi4xNjIuMDYyIDEuNTAxIDEuMTI2TDE4Ljc3MiAyOS4wOWMtLjg0IDEuMTI3LTEuOTgxIDEuMjUyLTIuOTQyLjEyNWwtNS41ODUtNi45NDhjLTEuMDgtMS42MjggMS42ODItMy45NDQgMy4wMDMtMi42M1oiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPjwvc3ZnPg==';\n\nreturn '<div class=\"bin-card\">' +\n           '<button id=\"total-bins\"' + (isCardSelected ? ' class=\"bin-card-selected\" ' : '') + 'mat-button>' +\n                '<div class=\"bin-card-content flex flex-row\">' +\n                    '<img src=\"data:image/svg+xml;base64,' + icon + '\"/>' +\n                    '<div class=\"bin-card-data flex flex-col\">' +\n                        '<div class=\"bin-card-header\">Total bins</div>' +\n                        '<div class=\"bin-card-value\">' + value + '</div>' +\n                    '</div>' +\n                '</div>' +\n           '</button>' +\n        '</div>';",
+            "applyDefaultMarkdownStyle": true,
+            "markdownCss": ""
+          },
+          "title": "New Markdown/HTML Card",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "actions": {
+            "elementClick": [
+              {
+                "name": "total-bins",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "custom",
+                "customFunction": "const $injector = widgetContext.$scope.$injector;\nconst attributeService = $injector.get(widgetContext.servicesMap.get('attributeService'));\nconst currentUser = widgetContext.currentUser;\nconst attributesArray = [\n    { key: 'displayFullBins', value: false },\n    { key: 'displayLowBatteryBins', value: false },\n    { key: 'displayOfflineBins', value: false }\n];\nattributeService.saveEntityAttributes({id: currentUser.customerId, entityType: 'CUSTOMER'},\n    'SERVER_SCOPE', attributesArray, {ignoreLoading: true}).subscribe();",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "9191ed68-b49e-d28d-a2a6-d40253f211ed"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "6743d611-3f49-5caf-4e28-c06eeebbe225",
+        "typeFullFqn": "system.cards.markdown_card"
+      },
+      "81c766cd-ae80-9f5e-fa44-9717cb1ba84f": {
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entityCount",
+              "name": null,
+              "entityAliasId": "6ee2c775-15f1-e7dc-a368-12a263215530",
+              "filterId": "4a477eb5-ba36-f5a8-0723-00d76f5f5687",
+              "dataKeys": [
+                {
+                  "name": "count",
+                  "type": "count",
+                  "label": "count",
+                  "color": "#2196f3",
+                  "settings": {}
+                }
+              ]
+            },
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "bbd8598b-83a5-5da8-43d3-4fd989919131",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "displayFullBins",
+                  "type": "attribute",
+                  "label": "displayFullBins",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextPattern": "# Markdown/HTML card \\n - **Current entity**: **${entityName}**. \\n - **Current value**: **${Random}**.",
+            "markdownTextFunction": "let value = '-';\nlet isCardSelected = false;\nif (data.length) {\n    value = data[0].count;\n    if (data[1]) {\n        isCardSelected = data[1].displayFullBins && data[1].displayFullBins !== 'false';\n    }\n}\n\nconst icon = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRDEyNzMwIiByeD0iNCIvPjxwYXRoIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE3LjI5MyAxMi4yOTNBMSAxIDAgMCAxIDE4IDEyaDRhMSAxIDAgMCAxIDEgMXYxaC02di0xYTEgMSAwIDAgMSAuMjkzLS43MDdaTTE1IDE0di0xYTMgMyAwIDAgMSAzLTNoNGEzIDMgMCAwIDEgMyAzdjFoNC4wNDhjLjUyNiAwIC45NTIuNDQ4Ljk1MiAxcy0uNDI2IDEtLjk1MiAxSDI3djExYTMgMyAwIDAgMS0zIDNoLTdjLS43OTYgMC0yLjU1OS0uMzE2LTMuMTIxLS44NzlBMyAzIDAgMCAxIDEzIDI3VjE2aC0yLjA0OGMtLjUyNiAwLS45NTItLjQ0OC0uOTUyLTFzLjQyNi0xIC45NTItMUgxNVptMCAydjEyaDEwVjE2SDE1WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTE2IDE5aDh2OGgtOHYtOFoiLz48L3N2Zz4=';\n\nreturn '<div class=\"bin-card\">' +\n           '<button id=\"full-bins\"' + (isCardSelected ? ' class=\"bin-card-selected\" ' : '') + 'mat-button>' +\n                '<div class=\"bin-card-content flex flex-row\">' +\n                    '<img src=\"data:image/svg+xml;base64,' + icon + '\"/>' +\n                    '<div class=\"bin-card-data flex flex-col\">' +\n                        '<div class=\"bin-card-header\">Fullness</div>' +\n                        '<div class=\"bin-card-value\">' + value + '</div>' +\n                    '</div>' +\n                '</div>' +\n           '</button>' +\n        '</div>';",
+            "applyDefaultMarkdownStyle": true,
+            "markdownCss": ""
+          },
+          "title": "New Markdown/HTML Card",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "actions": {
+            "elementClick": [
+              {
+                "name": "full-bins",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "custom",
+                "customFunction": "const $injector = widgetContext.$scope.$injector;\nconst attributeService = $injector.get(widgetContext.servicesMap.get('attributeService'));\nconst currentUser = widgetContext.currentUser;\nconst attributesArray = [\n    { key: 'displayFullBins', value: true },\n    { key: 'displayLowBatteryBins', value: false },\n    { key: 'displayOfflineBins', value: false }\n];\nattributeService.saveEntityAttributes({id: currentUser.customerId, entityType: 'CUSTOMER'},\n    'SERVER_SCOPE', attributesArray, {ignoreLoading: true}).subscribe();",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "e71119c0-064c-1078-5419-4f7b9bfcf6c5"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "81c766cd-ae80-9f5e-fa44-9717cb1ba84f",
+        "typeFullFqn": "system.cards.markdown_card"
+      },
+      "fdcc234a-0d39-30b8-318a-9fad15085bb0": {
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entityCount",
+              "name": null,
+              "entityAliasId": "6ee2c775-15f1-e7dc-a368-12a263215530",
+              "filterId": "b01ebf89-e19a-7627-14f7-a4f8c597b2fb",
+              "dataKeys": [
+                {
+                  "name": "count",
+                  "type": "count",
+                  "label": "count",
+                  "color": "#2196f3",
+                  "settings": {}
+                }
+              ]
+            },
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "bbd8598b-83a5-5da8-43d3-4fd989919131",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "displayLowBatteryBins",
+                  "type": "attribute",
+                  "label": "displayLowBatteryBins",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextPattern": "# Markdown/HTML card \\n - **Current entity**: **${entityName}**. \\n - **Current value**: **${Random}**.",
+            "markdownTextFunction": "let value = '-';\nlet isCardSelected = false;\nif (data.length) {\n    value = data[0].count;\n    if (data[1]) {\n        isCardSelected = data[1].displayLowBatteryBins && data[1].displayLowBatteryBins !== 'false';\n    }\n}\n\nconst icon = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRkY4QTAwIiByeD0iNCIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xOS41MjQgMjhoLTcuNjJWMTRoNy42Mm0uNjM4LTJoLTEuNTl2LTJoLTUuNzE1djJoLTEuNTlDMTAuNTcgMTIgMTAgMTIuNiAxMCAxMy4zM3YxNS4zNGMwIC43My41NzEgMS4zMyAxLjI2NyAxLjMzaDguODk1Yy43MDUgMCAxLjI2Ny0uNTkgMS4yNjctMS4zM1YxMy4zM2MwLS43My0uNTcyLTEuMzMtMS4yNjctMS4zM1ptLTEuNTkgMTJoLTUuNzE1djNoNS43MTR2LTNaTTMwIDE4aC0yLjg1N3YtN0wyMi4zOCAyMWgyLjg1N3Y4Ii8+PC9zdmc+';\n\nreturn '<div class=\"bin-card\">' +\n           '<button id=\"low-battery-bins\"' + (isCardSelected ? ' class=\"bin-card-selected\" ' : '') + 'mat-button>' +\n                '<div class=\"bin-card-content flex flex-row\">' +\n                    '<img src=\"data:image/svg+xml;base64,' + icon + '\"/>' +\n                    '<div class=\"bin-card-data flex flex-col\">' +\n                        '<div class=\"bin-card-header\">Low battery</div>' +\n                        '<div class=\"bin-card-value\">' + value + '</div>' +\n                    '</div>' +\n                '</div>' +\n           '</button>' +\n        '</div>';",
+            "applyDefaultMarkdownStyle": true,
+            "markdownCss": ""
+          },
+          "title": "New Markdown/HTML Card",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "actions": {
+            "elementClick": [
+              {
+                "name": "low-battery-bins",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "custom",
+                "customFunction": "const $injector = widgetContext.$scope.$injector;\nconst attributeService = $injector.get(widgetContext.servicesMap.get('attributeService'));\nconst currentUser = widgetContext.currentUser;\nconst attributesArray = [\n    { key: 'displayFullBins', value: false },\n    { key: 'displayLowBatteryBins', value: true },\n    { key: 'displayOfflineBins', value: false }\n];\nattributeService.saveEntityAttributes({id: currentUser.customerId, entityType: 'CUSTOMER'},\n    'SERVER_SCOPE', attributesArray, {ignoreLoading: true}).subscribe();",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "da4a1c1f-861e-759b-bad9-e5ba46bdc163"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "fdcc234a-0d39-30b8-318a-9fad15085bb0",
+        "typeFullFqn": "system.cards.markdown_card"
+      },
+      "369fcee9-5f64-e56d-d723-64f46ec383d1": {
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entityCount",
+              "name": null,
+              "entityAliasId": "6ee2c775-15f1-e7dc-a368-12a263215530",
+              "filterId": "cfdc11b4-28e0-0332-de61-fa20e4c17e56",
+              "dataKeys": [
+                {
+                  "name": "count",
+                  "type": "count",
+                  "label": "count",
+                  "color": "#2196f3",
+                  "settings": {}
+                }
+              ]
+            },
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "bbd8598b-83a5-5da8-43d3-4fd989919131",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "displayOfflineBins",
+                  "type": "attribute",
+                  "label": "displayOfflineBins",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextPattern": "# Markdown/HTML card \\n - **Current entity**: **${entityName}**. \\n - **Current value**: **${Random}**.",
+            "markdownTextFunction": "let value = '-';\nlet isCardSelected = false;\nif (data.length) {\n    value = data[0].count;\n    if (data[1]) {\n        isCardSelected = data[1].displayOfflineBins && data[1].displayOfflineBins !== 'false';\n    }\n}\n\nconst icon = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjNzU3NTc1IiByeD0iNCIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xNi4zMjIgMTIuNzA3YTQuMDI5IDQuMDI5IDAgMCAxIC4zMDMtMi4wNSAxNi4yNSAxNi4yNSAwIDAgMC04LjI4NCA0LjY1MmMtLjQ1NS40NzMtLjQ1NSAxLjE4MiAwIDEuNjMuMjAyLjIzNi40OC4zNDEuNzgzLjM0MS4zMDMgMCAuNTgtLjEwNS43ODMtLjM0MmExMy45MjggMTMuOTI4IDAgMCAxIDYuNDY1LTMuODM3bC0uMDUtLjM5NFpNMzEuNjc4IDE1LjMzNWExNi4yNSAxNi4yNSAwIDAgMC04LjI4NC00LjY1MWMuMjc4LjYzLjM3OSAxLjM0LjMwMyAyLjA1bC0uMDUuMzk0YTE0LjM4MSAxNC4zODEgMCAwIDEgNi40NjUgMy44MzdjLjQzLjQ0NiAxLjEzNi40NDYgMS41NjYgMCAuNDMtLjQ3My40My0xLjE4MyAwLTEuNjNaTTE2LjcgMTUuODg3Yy0xLjgxOC41NTItMy40ODUgMS41NzctNC44OTkgMy4wNDgtLjQ1NC40NzMtLjQ1NCAxLjE4MyAwIDEuNjMuMjAyLjIzNi40OC4zNDEuNzgzLjM0MS4yNzggMCAuNTgtLjEwNS43ODMtLjM0MSAxLjA2LTEuMDc4IDIuMjk4LTEuODkzIDMuNjM3LTIuMzRsLS4zMDMtMi4zMzhaTTIzLjMxOCAxNS44ODdsLS4yNzggMi4zMzlhOS4wMTYgOS4wMTYgMCAwIDEgMy42MTIgMi4zMzljLjQ1NC40NDcgMS4xMzYuNDQ3IDEuNTY2IDAgLjQ1NC0uNDczLjQ1NC0xLjE4MyAwLTEuNjMtMS40MTQtMS40NzEtMy4wODEtMi40OTYtNC45LTMuMDQ4Wk0xNS4yNjEgMjIuNTM2YTEuMTkyIDEuMTkyIDAgMCAwIDAgMS42M2MuMjI4LjIzNi41MDUuMzQxLjc4My4zNDFzLjU4MS0uMTA1Ljc4My0uMzQxYy4yNTMtLjI2My41My0uNDczLjgwOC0uNjU3bC0uMzAzLTIuNDQ1Yy0uNzgzLjM0Mi0xLjQ2NS44NDEtMi4wNyAxLjQ3MlpNMjIuNjg3IDIxLjA2NGwtLjMwMyAyLjQ0NWMuMjc3LjE4My41NTUuNDIuNzgyLjY1Ny40NTUuNDQ2IDEuMTM3LjQ0NiAxLjU2NiAwIC40NTUtLjQ3NC40NTUtMS4xODMgMC0xLjYzYTYuMDcgNi4wNyAwIDAgMC0yLjA0NS0xLjQ3MlpNMTkuMjc3IDI0LjAwOGMuMjI3LS4wOC40OC0uMDguNzA3LS4wOC4yNTMgMCAuNTA1LjAyNy43NTguMDhsMS4zNjQtMTEuNTExYy4wMjUtLjEwNS4wMjUtLjE4NC4wMjUtLjI5IDAtMS4xODItLjkzNS0yLjIwNy0yLjEyMi0yLjIwNy0xLjI2MiAwLTIuMjQ3IDEuMTgzLTIuMTIxIDIuNDdsMS4zODkgMTEuNTM3Wk0yMC4wMSAyNS41NTljLTEuMTYyIDAtMi4xMjIuOTk4LTIuMTIyIDIuMjA3IDAgMS4yMzUuOTYgMi4yMzQgMi4xMjIgMi4yMzQgMS4xODcgMCAyLjE0Ny0uOTk5IDIuMTQ3LTIuMjM0IDAtMS4yMDktLjk2LTIuMjA3LTIuMTQ3LTIuMjA3WiIvPjwvc3ZnPg==';\n\nreturn '<div class=\"bin-card\">' +\n           '<button id=\"offline-bins\"' + (isCardSelected ? ' class=\"bin-card-selected\" ' : '') + 'mat-button>' +\n                '<div class=\"bin-card-content flex flex-row\">' +\n                    '<img src=\"data:image/svg+xml;base64,' + icon + '\"/>' +\n                    '<div class=\"bin-card-data flex flex-col\">' +\n                        '<div class=\"bin-card-header\">Offline</div>' +\n                        '<div class=\"bin-card-value\">' + value + '</div>' +\n                    '</div>' +\n                '</div>' +\n           '</button>' +\n        '</div>';",
+            "applyDefaultMarkdownStyle": true,
+            "markdownCss": ""
+          },
+          "title": "New Markdown/HTML Card",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "actions": {
+            "elementClick": [
+              {
+                "name": "offline-bins",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "custom",
+                "customFunction": "const $injector = widgetContext.$scope.$injector;\nconst attributeService = $injector.get(widgetContext.servicesMap.get('attributeService'));\nconst currentUser = widgetContext.currentUser;\nconsole.log(currentUser);\nconst attributesArray = [\n    { key: 'displayFullBins', value: false },\n    { key: 'displayLowBatteryBins', value: false },\n    { key: 'displayOfflineBins', value: true }\n];\nattributeService.saveEntityAttributes({id: currentUser.customerId, entityType: 'CUSTOMER'},\n    'SERVER_SCOPE', attributesArray, {ignoreLoading: true}).subscribe();",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "4b4a2c35-e86a-01f9-d941-ab77ddf8bbc3"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "369fcee9-5f64-e56d-d723-64f46ec383d1",
+        "typeFullFqn": "system.cards.markdown_card"
+      },
+      "14b9092d-f098-0ce9-e214-3e19032d450a": {
+        "type": "latest",
+        "sizeX": 7.5,
+        "sizeY": 6.5,
+        "config": {
+          "showTitle": true,
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0",
+          "settings": {
+            "entitiesTitle": "Bins",
+            "enableSearch": true,
+            "enableSelectColumnDisplay": false,
+            "enableStickyHeader": true,
+            "enableStickyAction": true,
+            "reserveSpaceForHiddenAction": "true",
+            "displayEntityName": true,
+            "entityNameColumnTitle": "Serial Number",
+            "displayEntityLabel": false,
+            "displayEntityType": false,
+            "displayPagination": false,
+            "defaultSortOrder": "entityName",
+            "useRowStyleFunction": false
+          },
+          "title": "",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 500,
+            "padding": "5px 10px 5px 5px",
+            "color": "#29313C",
+            "letterSpacing": "0.25px"
+          },
+          "showLegend": false,
+          "datasources": [
+            {
+              "type": "device",
+              "name": null,
+              "deviceId": "8204cf40-1246-11f1-b5a7-93241ed57bdc",
+              "filterId": "4a477eb5-ba36-f5a8-0723-00d76f5f5687",
+              "dataKeys": [
+                {
+                  "name": "address",
+                  "type": "attribute",
+                  "label": "Address",
+                  "color": "#2196f3",
+                  "settings": {
+                    "columnWidth": "25%",
+                    "useCellStyleFunction": false,
+                    "useCellContentFunction": false,
+                    "defaultColumnVisibility": "visible",
+                    "columnSelectionToDisplay": "enabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": null,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                },
+                {
+                  "name": "active",
+                  "type": "attribute",
+                  "label": "Connection",
+                  "color": "#4caf50",
+                  "settings": {
+                    "columnWidth": "0px",
+                    "useCellStyleFunction": false,
+                    "useCellContentFunction": true,
+                    "cellContentFunction": "const isActive = value === 'true';\nconst status = isActive ? 'Online' : 'Offline';\nconst color = isActive ? '#3AA94D' : '#C42F37';\nconst bgColor = isActive ? 'rgba(58, 169, 77, 0.08)' : 'rgba(196, 47, 55, 0.08)';\nreturn '<div style=\"width:fit-content;padding:4px 8px;border-radius:8px;line-height:20px;font-size:14px;font-weight:500;letter-spacing:0.25px;color:'+ color +';background-color:'+ bgColor +'\">' +\n            status + '</div>';",
+                    "defaultColumnVisibility": "visible",
+                    "columnSelectionToDisplay": "enabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": null,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                },
+                {
+                  "name": "fullLevel",
+                  "type": "timeseries",
+                  "label": "Fullness",
+                  "color": "#f44336",
+                  "settings": {
+                    "columnWidth": "0px",
+                    "useCellStyleFunction": true,
+                    "cellStyleFunction": "return {\n  \"color\": entity['isFull'] === 'true' ? \"#D12730\" : \"#4B535B\"  \n};",
+                    "useCellContentFunction": true,
+                    "cellContentFunction": "return value ? (parseFloat(value).toFixed(0) + '%') : '-';",
+                    "defaultColumnVisibility": "visible",
+                    "columnSelectionToDisplay": "enabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": "NONE",
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                },
+                {
+                  "name": "batteryLevel",
+                  "type": "timeseries",
+                  "label": "Battery Level",
+                  "color": "#ffc107",
+                  "settings": {
+                    "columnWidth": "0px",
+                    "useCellStyleFunction": true,
+                    "cellStyleFunction": "return {\n  \"color\": entity['isLowBattery'] === 'true' ? \"#D12730\" : \"#4B535B\"  \n};",
+                    "useCellContentFunction": true,
+                    "cellContentFunction": "return value ? (parseFloat(value).toFixed(0) + '%') : '-';",
+                    "defaultColumnVisibility": "visible",
+                    "columnSelectionToDisplay": "enabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": "NONE",
+                  "units": null,
+                  "decimals": 0,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                },
+                {
+                  "name": "isFull",
+                  "type": "attribute",
+                  "label": "isFull",
+                  "color": "#607d8b",
+                  "settings": {
+                    "columnWidth": "0px",
+                    "useCellStyleFunction": false,
+                    "useCellContentFunction": false,
+                    "defaultColumnVisibility": "hidden",
+                    "columnSelectionToDisplay": "disabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": null,
+                  "units": null,
+                  "decimals": 0,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                },
+                {
+                  "name": "isLowBattery",
+                  "type": "attribute",
+                  "label": "isLowBattery",
+                  "color": "#9c27b0",
+                  "settings": {
+                    "columnWidth": "0px",
+                    "useCellStyleFunction": false,
+                    "useCellContentFunction": false,
+                    "defaultColumnVisibility": "hidden",
+                    "columnSelectionToDisplay": "disabled",
+                    "columnExportOption": "onlyVisible"
+                  },
+                  "aggregationType": null,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitleIcon": false,
+          "titleTooltip": "",
+          "enableDataExport": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "No bins found",
+          "actions": {
+            "headerButton": [
+              {
+                "name": "Add bins",
+                "icon": "add",
+                "useShowWidgetActionFunction": false,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "781dc3c9-67d4-4393-684b-8f3380db1724"
+              }
+            ],
+            "rowClick": [
+              {
+                "name": "bin-details",
+                "icon": "more_horiz",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "openDashboardState",
+                "targetDashboardStateId": "selected_bin",
+                "setEntityId": true,
+                "stateEntityParamName": null,
+                "openRightLayout": false,
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "9b08f3aa-7fbe-257d-b15e-ff5ce4c9c0e8"
+              }
+            ],
+            "actionCellButton": [
+              {
+                "name": "Edit",
+                "icon": "edit",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "f3f85e88-6d4a-4b39-d07f-8f631bff0d21"
+              },
+              {
+                "name": "Delete",
+                "icon": "delete_forever",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "acbab6c2-c447-505c-6b8d-e5d3268c97ca"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "14b9092d-f098-0ce9-e214-3e19032d450a",
+        "typeFullFqn": "system.cards.entities_table"
+      },
+      "bd47533e-1ef8-bea5-e982-728322a17536": {
+        "type": "alarm",
+        "sizeX": 10.5,
+        "sizeY": 6.5,
+        "config": {
+          "timewindow": {
+            "hideAggregation": false,
+            "hideAggInterval": false,
+            "hideTimezone": false,
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 0,
+              "timewindowMs": 604800000,
+              "quickInterval": "CURRENT_DAY",
+              "interval": 1000
+            },
+            "aggregation": {
+              "type": "NONE",
+              "limit": 200
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0",
+          "settings": {
+            "enableSelection": false,
+            "enableSearch": true,
+            "enableSelectColumnDisplay": false,
+            "enableFilter": true,
+            "enableStickyHeader": true,
+            "enableStickyAction": false,
+            "reserveSpaceForHiddenAction": "true",
+            "displayDetails": false,
+            "allowAcknowledgment": false,
+            "allowClear": false,
+            "displayPagination": false,
+            "defaultSortOrder": "-createdTime",
+            "useRowStyleFunction": false
+          },
+          "title": "New Alarms table",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 500,
+            "padding": "5px 10px 5px 2px",
+            "color": "#29313C",
+            "letterSpacing": "0.25px"
+          },
+          "useDashboardTimewindow": false,
+          "showLegend": false,
+          "alarmSource": {
+            "type": "entity",
+            "name": null,
+            "entityAliasId": "6ee2c775-15f1-e7dc-a368-12a263215530",
+            "filterId": "b57ed975-3305-c009-023a-bbb9d8fd36ee",
+            "dataKeys": [
+              {
+                "name": "originator",
+                "type": "alarm",
+                "label": "Originator",
+                "color": "#4caf50",
+                "settings": {
+                  "useCellStyleFunction": false,
+                  "cellStyleFunction": "",
+                  "useCellContentFunction": false,
+                  "cellContentFunction": ""
+                }
+              },
+              {
+                "name": "createdTime",
+                "type": "alarm",
+                "label": "Created time",
+                "color": "#2196f3",
+                "settings": {
+                  "useCellStyleFunction": false,
+                  "cellStyleFunction": "",
+                  "useCellContentFunction": false,
+                  "cellContentFunction": ""
+                }
+              },
+              {
+                "name": "type",
+                "type": "alarm",
+                "label": "Type",
+                "color": "#f44336",
+                "settings": {
+                  "columnWidth": "25%",
+                  "useCellStyleFunction": false,
+                  "useCellContentFunction": false,
+                  "defaultColumnVisibility": "visible",
+                  "columnSelectionToDisplay": "enabled",
+                  "columnExportOption": "onlyVisible"
+                },
+                "aggregationType": null,
+                "units": null,
+                "decimals": null,
+                "funcBody": null,
+                "usePostProcessing": null,
+                "postFuncBody": null
+              },
+              {
+                "name": "severity",
+                "type": "alarm",
+                "label": "Details",
+                "color": "#ffc107",
+                "settings": {
+                  "columnWidth": "0px",
+                  "useCellStyleFunction": true,
+                  "cellStyleFunction": "return {\n    \"color\": \"#D12730\"\n}",
+                  "useCellContentFunction": true,
+                  "cellContentFunction": "return alarm.details.data ? parseFloat(alarm.details.data).toFixed(0) + '%' : '-';",
+                  "defaultColumnVisibility": "visible",
+                  "columnSelectionToDisplay": "enabled",
+                  "columnExportOption": "onlyVisible"
+                },
+                "aggregationType": null,
+                "units": null,
+                "decimals": null,
+                "funcBody": null,
+                "usePostProcessing": null,
+                "postFuncBody": null
+              }
+            ]
+          },
+          "alarmsPollingInterval": 5,
+          "showTitleIcon": false,
+          "titleIcon": "more_horiz",
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "displayTimewindow": true,
+          "actions": {
+            "headerButton": [
+              {
+                "name": "Alarm rules",
+                "icon": "settings",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "3e84d938-b2ee-9fd2-d18e-7555703ad781"
+              }
+            ],
+            "actionCellButton": [
+              {
+                "name": "Clear",
+                "icon": "close",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "2c0d3d51-a177-b473-2309-95caa4f4d7f4"
+              }
+            ]
+          },
+          "datasources": [],
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "alarmFilterConfig": {
+            "statusList": [
+              "ACTIVE"
+            ],
+            "severityList": [],
+            "typeList": [],
+            "searchPropagatedAlarms": false
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "bd47533e-1ef8-bea5-e982-728322a17536",
+        "typeFullFqn": "system.alarm_widgets.alarms_table"
+      },
+      "b89177ac-8f67-3ae5-dfc8-945d995ced41": {
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "89427837-ec63-72e5-7388-d55276d731d8",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "name",
+                  "type": "entityField",
+                  "label": "Name",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "latitude",
+                  "type": "attribute",
+                  "label": "latitude",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "longitude",
+                  "type": "attribute",
+                  "label": "longitude",
+                  "color": "#ffc107",
+                  "settings": {}
+                },
+                {
+                  "name": "address",
+                  "type": "attribute",
+                  "label": "address",
+                  "color": "#ffc107",
+                  "settings": {}
+                },
+                {
+                  "name": "fullLevel",
+                  "type": "timeseries",
+                  "label": "fullLevel",
+                  "color": "#9c27b0",
+                  "settings": {}
+                },
+                {
+                  "name": "batteryLevel",
+                  "type": "timeseries",
+                  "label": "batteryLevel",
+                  "color": "#8bc34a",
+                  "settings": {}
+                },
+                {
+                  "name": "isFull",
+                  "type": "attribute",
+                  "label": "isFull",
+                  "color": "#3f51b5",
+                  "settings": {}
+                },
+                {
+                  "name": "isLowBattery",
+                  "type": "attribute",
+                  "label": "isLowBattery",
+                  "color": "#e91e63",
+                  "settings": {}
+                },
+                {
+                  "name": "active",
+                  "type": "attribute",
+                  "label": "active",
+                  "color": "#607d8b",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextFunction": "let entity, entityName, address, latitude, longitude, lastUpdate, fullLevel, batteryLevel, isFull, fullColor, isLowBattery, lowBatteryColor, isActive, sensorStatus, statusColor, statusBgColor;\nif (data.length) {\n    entity = data[0];\n    entityName = entity.entityName;\n    address = entity.address ? entity.address : '-';\n    latitude = isNumber(entity.latitude) ? entity.latitude : '-';\n    longitude = isNumber(entity.longitude) ? entity.longitude : '-';\n    fullLevel = processValue(entity.fullLevel, 0) + '%';\n    batteryLevel = processValue(entity.batteryLevel, 0) + '%';\n    isFull = entity.isFull && entity.isFull !== 'false';\n    fullColor = isFull ? '#D12730' : '#29313C';\n    isLowBattery = entity.isLowBattery && entity.isLowBattery !== 'false';\n    lowBatteryColor = isLowBattery ? '#D12730' : '#29313C';\n    isActive = entity.active === 'true';\n    sensorStatus = isActive ? 'Online' : 'Offline';\n    statusColor = isActive ? '#3AA94D' : '#C42F37';\n    statusBgColor = isActive ? 'rgba(58, 169, 77, 0.08)' : 'rgba(196, 47, 55, 0.08)';\n    lastUpdate = (entity['batteryLevel|ts'] || entity['fullLevel|ts']) ? moment(Math.max(entity['batteryLevel|ts'], entity['fullLevel|ts'])).format('D MMM YYYY HH:mm') : '-';\n} else {\n    entityName = '-';\n    address = '-';\n    latitude = '-';\n    longitude = '-';\n    lastUpdate = '-';\n    fullLevel = '-';\n    batteryLevel = '-';\n    isFull = false;\n    fullColor = '#29313C';\n    isLowBattery = false;\n    lowBatteryColor = '#29313C';\n    isActive = false;\n    sensorStatus = 'Offline';\n    statusColor = '#C42F37';\n    statusBgColor = 'rgba(196, 47, 55, 0.08)';\n}\n\nreturn '<div class=\"sensor-details-container\" fxLayout=\"column\">' +\n            '<div class=\"sensor-details-header\">Sensor ' + entityName + '</div>' +\n            '<div class=\"sensor-details-row\" fxLayout=\"column\">' +\n                '<div class=\"label\">Address</div>' +\n                '<div class=\"value\">'+ address +'</div>' +\n            '</div>' +\n            '<div fxLayout=\"row\" fxLayoutGap=\"16px\">' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Latitude</div>' +\n                    '<div class=\"value\">'+ latitude +'</div>' +\n                '</div>' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Longitude</div>' +\n                    '<div class=\"value\">'+ longitude +'</div>' +\n                '</div>' +\n            '</div>' +\n            '<div fxLayout=\"row\" fxLayoutGap=\"16px\">' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Fullness level</div>' +\n                    '<div class=\"value\" style=\"color:'+ fullColor +'\">'+ fullLevel +'</div>' +\n                '</div>' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Battery level</div>' +\n                    '<div class=\"value\" style=\"color:'+ lowBatteryColor +'\">'+ batteryLevel +'</div>' +\n                '</div>' +\n            '</div>' +\n            '<div fxLayout=\"row\" fxLayoutGap=\"16px\">' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Connection</div>' +\n                    '<div class=\"sensor-details-status\" style=\"color:'+ statusColor +';background-color:'+ statusBgColor +'\">' + sensorStatus + '</div>' +\n                '</div>' +\n                '<div fxFlex class=\"sensor-details-row\" fxLayout=\"column\">' +\n                    '<div class=\"label\">Last update</div>' +\n                    '<div class=\"value\" style=\"border-bottom:none;\">'+ lastUpdate +'</div>' +\n                '</div>' +\n            '</div>' +\n       '</div>';\n\n\nfunction isNumber(value) {\n    return (typeof value === 'number' && isFinite(value));\n}\n\nfunction processValue(value, dec) {\n    value = parseFloat(value);\n    if (isNumber(value)) {\n        if (isNumber(dec)) {\n            value = parseFloat(value.toFixed(dec));\n        }\n        return value;\n    } else {\n        return '-';\n    }\n}",
+            "markdownCss": ".sensor-details-container {\n    height: 100%;\n    padding: 10px 15px;\n    overflow: auto;\n}\n\n.sensor-details-header {\n    color: #29313C;\n    margin-bottom: 16px;\n    font-weight: 500;\n    line-height: 24px;\n    letter-spacing: 0.25px;\n}\n\n.sensor-details-container .sensor-details-row:not(:last-child) {\n    margin-bottom: 20px;\n}\n\n.sensor-details-container .sensor-details-row .label {\n    font-size: 12px;\n    line-height: 16px;\n    letter-spacing: 0.25px;\n    color: #9FA6B4;\n}\n\n.sensor-details-container .sensor-details-row .value {\n    padding: 5px 0 6px 0;\n    border-bottom: 1px solid rgba(0, 0, 0, 0.12);\n    font-size: 16px;\n    line-height: 24px;\n    letter-spacing: 0.15px;\n    color: #29313C;\n}\n\n.sensor-details-status {\n    width: fit-content;\n    padding: 4px 8px;\n    margin-top: 6px;\n    font-size: 14px;\n    font-weight: 500;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    border-radius: 8px;\n}"
+          },
+          "title": "",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 500,
+            "padding": "5px 10px 5px 10px",
+            "color": "#29313C",
+            "letterSpacing": "0.25px"
+          },
+          "showLegend": false,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "actions": {
+            "headerButton": [
+              {
+                "name": "Edit sensor",
+                "icon": "edit",
+                "useShowWidgetActionFunction": null,
+                "showWidgetActionFunction": "return true;",
+                "type": "doNothing",
+                "openInSeparateDialog": false,
+                "openInPopover": false,
+                "id": "a10c91e9-4ea7-9d0f-5828-e79becf5436b"
+              }
+            ]
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "b89177ac-8f67-3ae5-dfc8-945d995ced41",
+        "typeFullFqn": "system.cards.markdown_card"
+      },
+      "6672413e-b50d-c915-a8da-47f873df2458": {
+        "type": "alarm",
+        "sizeX": 10.5,
+        "sizeY": 6.5,
+        "config": {
+          "timewindow": {
+            "hideAggregation": false,
+            "hideAggInterval": false,
+            "hideTimezone": false,
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 0,
+              "timewindowMs": 604800000,
+              "quickInterval": "CURRENT_DAY",
+              "interval": 1000
+            },
+            "aggregation": {
+              "type": "NONE",
+              "limit": 200
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0",
+          "settings": {
+            "enableSelection": false,
+            "enableSearch": true,
+            "enableSelectColumnDisplay": false,
+            "enableFilter": true,
+            "enableStickyHeader": true,
+            "enableStickyAction": false,
+            "reserveSpaceForHiddenAction": "true",
+            "displayDetails": false,
+            "allowAcknowledgment": false,
+            "allowClear": true,
+            "displayPagination": false,
+            "defaultSortOrder": "-createdTime",
+            "useRowStyleFunction": false
+          },
+          "title": "New Alarms table",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 500,
+            "padding": "5px 10px 5px 2px",
+            "color": "#29313C",
+            "letterSpacing": "0.25px"
+          },
+          "useDashboardTimewindow": false,
+          "showLegend": false,
+          "alarmSource": {
+            "type": "entity",
+            "name": null,
+            "entityAliasId": "89427837-ec63-72e5-7388-d55276d731d8",
+            "filterId": null,
+            "dataKeys": [
+              {
+                "name": "originator",
+                "type": "alarm",
+                "label": "Originator",
+                "color": "#4caf50",
+                "settings": {
+                  "useCellStyleFunction": false,
+                  "cellStyleFunction": "",
+                  "useCellContentFunction": false,
+                  "cellContentFunction": ""
+                }
+              },
+              {
+                "name": "createdTime",
+                "type": "alarm",
+                "label": "Created time",
+                "color": "#2196f3",
+                "settings": {
+                  "useCellStyleFunction": false,
+                  "cellStyleFunction": "",
+                  "useCellContentFunction": false,
+                  "cellContentFunction": ""
+                }
+              },
+              {
+                "name": "type",
+                "type": "alarm",
+                "label": "Type",
+                "color": "#f44336",
+                "settings": {
+                  "columnWidth": "25%",
+                  "useCellStyleFunction": false,
+                  "useCellContentFunction": false,
+                  "defaultColumnVisibility": "visible",
+                  "columnSelectionToDisplay": "enabled",
+                  "columnExportOption": "onlyVisible"
+                },
+                "aggregationType": null,
+                "units": null,
+                "decimals": null,
+                "funcBody": null,
+                "usePostProcessing": null,
+                "postFuncBody": null
+              },
+              {
+                "name": "severity",
+                "type": "alarm",
+                "label": "Details",
+                "color": "#ffc107",
+                "settings": {
+                  "columnWidth": "0px",
+                  "useCellStyleFunction": true,
+                  "cellStyleFunction": "return {\n    \"color\": \"#D12730\"\n}",
+                  "useCellContentFunction": true,
+                  "cellContentFunction": "return alarm.details.data ? parseFloat(alarm.details.data).toFixed(0) + '%' : '-';",
+                  "defaultColumnVisibility": "visible",
+                  "columnSelectionToDisplay": "enabled",
+                  "columnExportOption": "onlyVisible"
+                },
+                "aggregationType": null,
+                "units": null,
+                "decimals": null,
+                "funcBody": null,
+                "usePostProcessing": null,
+                "postFuncBody": null
+              }
+            ]
+          },
+          "alarmsPollingInterval": 5,
+          "showTitleIcon": false,
+          "titleIcon": "more_horiz",
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "displayTimewindow": true,
+          "actions": {
+            "headerButton": [],
+            "actionCellButton": []
+          },
+          "datasources": [],
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "alarmFilterConfig": {
+            "statusList": [
+              "ACTIVE"
+            ],
+            "severityList": [],
+            "typeList": [],
+            "searchPropagatedAlarms": false
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "6672413e-b50d-c915-a8da-47f873df2458",
+        "typeFullFqn": "system.alarm_widgets.alarms_table"
+      },
+      "f7e58e0e-4207-8e1c-1825-67d85a19234a": {
+        "type": "latest",
+        "sizeX": 8.5,
+        "sizeY": 6.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "89427837-ec63-72e5-7388-d55276d731d8",
+              "filterId": null,
+              "dataKeys": [
+                {
+                  "name": "latitude",
+                  "type": "attribute",
+                  "label": "latitude",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "longitude",
+                  "type": "attribute",
+                  "label": "longitude",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "active",
+                  "type": "attribute",
+                  "label": "active",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "isLowBattery",
+                  "type": "attribute",
+                  "label": "isLowBattery",
+                  "color": "#607d8b",
+                  "settings": {}
+                },
+                {
+                  "name": "isFull",
+                  "type": "attribute",
+                  "label": "isFull",
+                  "color": "#607d8b",
+                  "settings": {}
+                }
+              ]
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "provider": "openstreet-map",
+            "gmApiKey": "AIzaSyDoEx2kaGz3PxwbI9T7ccTSg5xjdw8Nw8Q",
+            "gmDefaultMapType": "roadmap",
+            "mapProvider": "CartoDB.Positron",
+            "useCustomProvider": false,
+            "customProviderTileUrl": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "mapProviderHere": "HERE.normalDay",
+            "credentials": {
+              "app_id": "AhM6TzD9ThyK78CT3ptx",
+              "app_code": "p6NPiITB3Vv0GMUFnkLOOg"
+            },
+            "mapImageUrl": "tb-image;/api/images/system/here_map_system_widget_map_image.svg",
+            "tmApiKey": "84d6d83e0e51e481e50454ccbe8986b",
+            "tmDefaultMapType": "roadmap",
+            "latKeyName": "latitude",
+            "lngKeyName": "longitude",
+            "xPosKeyName": "xPos",
+            "yPosKeyName": "yPos",
+            "defaultZoomLevel": 5,
+            "defaultCenterPosition": "0,0",
+            "disableScrollZooming": false,
+            "disableDoubleClickZooming": false,
+            "disableZoomControl": false,
+            "fitMapBounds": true,
+            "useDefaultCenterPosition": false,
+            "mapPageSize": 16384,
+            "markerOffsetX": 0.5,
+            "markerOffsetY": 1,
+            "draggableMarker": true,
+            "showLabel": false,
+            "showTooltip": false,
+            "color": "#fe7569",
+            "useColorFunction": false,
+            "useMarkerImageFunction": true,
+            "markerImageFunction": "let image = images[0];\nconst isFull = data.isFull && data.isFull !== 'false';\nconst isLowBattery = data.isLowBattery && data.isLowBattery !== 'false';\nconst isActive = data.active && data.active !== 'false';\n\nif (!isActive) {\n    image = images[3];\n} else if (isFull) {\n    image = images[1];\n} else if (isLowBattery) {\n    image = images[2];\n}\n\nreturn {\n    url: image,\n    size: 28\n};\n",
+            "markerImages": [
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_0.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_1.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_2.svg",
+              "tb-image;/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_3.svg"
+            ],
+            "showPolygon": false,
+            "polygonKeyName": "coordinates",
+            "editablePolygon": true,
+            "showPolygonLabel": false,
+            "usePolygonLabelFunction": false,
+            "polygonLabel": "${entityName}",
+            "showPolygonTooltip": false,
+            "showPolygonTooltipAction": "click",
+            "autoClosePolygonTooltip": true,
+            "usePolygonTooltipFunction": false,
+            "polygonTooltipPattern": "<b>${entityName}</b><br/><br/><b>TimeStamp:</b> ${coordinates|ts:7}<br/><br/><link-act name='delete'>Delete</link-act>",
+            "polygonColor": "#3388ff",
+            "polygonOpacity": 0.5,
+            "usePolygonColorFunction": false,
+            "polygonStrokeColor": "#3388ff",
+            "polygonStrokeOpacity": 1,
+            "polygonStrokeWeight": 1,
+            "usePolygonStrokeColorFunction": false,
+            "showCircle": false,
+            "circleKeyName": "perimeter",
+            "editableCircle": false,
+            "showCircleLabel": false,
+            "useCircleLabelFunction": false,
+            "circleLabel": "${entityName}",
+            "showCircleTooltip": false,
+            "showCircleTooltipAction": "click",
+            "autoCloseCircleTooltip": true,
+            "useCircleTooltipFunction": false,
+            "circleTooltipPattern": "<b>${entityName}</b><br/><br/><b>TimeStamp:</b> ${ts:7}",
+            "circleFillColor": "#3388ff",
+            "circleFillColorOpacity": 0.2,
+            "useCircleFillColorFunction": false,
+            "circleStrokeColor": "#3388ff",
+            "circleStrokeOpacity": 1,
+            "circleStrokeWeight": 3,
+            "useCircleStrokeColorFunction": false,
+            "snappable": false,
+            "initDragMode": false,
+            "hideAllControlButton": false,
+            "hideDrawControlButton": false,
+            "hideEditControlButton": false,
+            "hideRemoveControlButton": false,
+            "useClusterMarkers": false,
+            "zoomOnClick": true,
+            "maxClusterRadius": 80,
+            "animate": true,
+            "spiderfyOnMaxZoom": false,
+            "showCoverageOnHover": true,
+            "chunkedLoading": false,
+            "removeOutsideVisibleBounds": true,
+            "useIconCreateFunction": false
+          },
+          "title": "",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "widgetStyle": {},
+          "actions": {
+            "tooltipAction": [
+              {
+                "name": "delete",
+                "icon": "more_horiz",
+                "type": "custom",
+                "customFunction": "var entityDatasource = widgetContext.map.map.datasources.filter(\n    function(entity) {\n        return entity.entityId === entityId.id;\n    });\n\nwidgetContext.map.setMarkerLocation(entityDatasource[0], null, null).subscribe(() => widgetContext.updateAliases());",
+                "id": "54c293c4-9ca6-e34f-dc6a-0271944c1c66"
+              },
+              {
+                "name": "delete_polygon",
+                "icon": "more_horiz",
+                "type": "custom",
+                "customFunction": "var entityDatasource = widgetContext.map.map.datasources.filter(\n    function(entity) {\n        return entity.entityId === entityId.id\n    });\n\nwidgetContext.map.savePolygonLocation(entityDatasource[0], null).subscribe(() => widgetContext.updateAliases());",
+                "id": "6beb7bed-dfd8-388d-b60c-82988ab52f06"
+              }
+            ]
+          },
+          "showTitleIcon": false,
+          "titleIcon": "more_horiz",
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "f7e58e0e-4207-8e1c-1825-67d85a19234a",
+        "typeFullFqn": "system.input_widgets.markers_placement_openstreetmap"
+      },
+      "1c29fe6f-d07a-61c4-2c16-01c861588074": {
+        "typeFullFqn": "system.state_chart",
+        "type": "timeseries",
+        "sizeX": 8,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": "",
+              "entityAliasId": "89427837-ec63-72e5-7388-d55276d731d8",
+              "dataKeys": [
+                {
+                  "name": "fullLevel",
+                  "type": "timeseries",
+                  "label": "Fullness",
+                  "color": "#4B535B",
+                  "settings": {
+                    "yAxisId": "default",
+                    "showInLegend": true,
+                    "dataHiddenByDefault": false,
+                    "type": "line",
+                    "lineSettings": {
+                      "showLine": true,
+                      "step": true,
+                      "stepType": "end",
+                      "smooth": false,
+                      "lineType": "solid",
+                      "lineWidth": 2,
+                      "showPoints": false,
+                      "showPointLabel": false,
+                      "pointLabelPosition": "top",
+                      "pointLabelFont": {
+                        "family": "Roboto",
+                        "size": 11,
+                        "sizeUnit": "px",
+                        "style": "normal",
+                        "weight": "400",
+                        "lineHeight": "1"
+                      },
+                      "pointLabelColor": "rgba(0, 0, 0, 0.76)",
+                      "enablePointLabelBackground": false,
+                      "pointLabelBackground": "rgba(255,255,255,0.56)",
+                      "pointShape": "circle",
+                      "pointSize": 12,
+                      "fillAreaSettings": {
+                        "type": "none",
+                        "opacity": 0.4,
+                        "gradient": {
+                          "start": 100,
+                          "end": 0
+                        }
+                      }
+                    },
+                    "barSettings": {
+                      "showBorder": false,
+                      "borderWidth": 2,
+                      "borderRadius": 0,
+                      "showLabel": false,
+                      "labelPosition": "top",
+                      "labelFont": {
+                        "family": "Roboto",
+                        "size": 11,
+                        "sizeUnit": "px",
+                        "style": "normal",
+                        "weight": "400",
+                        "lineHeight": "1"
+                      },
+                      "labelColor": "rgba(0, 0, 0, 0.76)",
+                      "enableLabelBackground": false,
+                      "labelBackground": "rgba(255,255,255,0.56)",
+                      "backgroundSettings": {
+                        "type": "none",
+                        "opacity": 0.4,
+                        "gradient": {
+                          "start": 100,
+                          "end": 0
+                        }
+                      }
+                    },
+                    "comparisonSettings": {
+                      "showValuesForComparison": false,
+                      "comparisonValuesLabel": "",
+                      "color": ""
+                    }
+                  },
+                  "decimals": null,
+                  "aggregationType": null,
+                  "units": "%",
+                  "funcBody": null,
+                  "usePostProcessing": true,
+                  "postFuncBody": "return Math.round(value / 5) * 5;"
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "latestDataKeys": []
+            }
+          ],
+          "timewindow": {
+            "hideAggregation": false,
+            "hideAggInterval": false,
+            "hideTimezone": false,
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 0,
+              "interval": 10000,
+              "timewindowMs": 300000,
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideQuickInterval": false
+            },
+            "history": {
+              "historyType": 0,
+              "interval": 1000,
+              "timewindowMs": 60000,
+              "fixedTimewindow": {
+                "startTimeMs": 1747631491771,
+                "endTimeMs": 1747717891771
+              },
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideFixedInterval": false,
+              "hideQuickInterval": false
+            },
+            "aggregation": {
+              "type": "NONE",
+              "limit": 25000
+            },
+            "timezone": null
+          },
+          "showTitle": true,
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "yAxes": {
+              "default": {
+                "units": "%",
+                "decimals": 0,
+                "show": true,
+                "label": "",
+                "labelFont": {
+                  "family": "Roboto",
+                  "size": 12,
+                  "sizeUnit": "px",
+                  "style": "normal",
+                  "weight": "600",
+                  "lineHeight": "1"
+                },
+                "labelColor": "rgba(0, 0, 0, 0.54)",
+                "position": "left",
+                "showTickLabels": true,
+                "tickLabelFont": {
+                  "family": "Roboto",
+                  "size": 12,
+                  "sizeUnit": "px",
+                  "style": "normal",
+                  "weight": "400",
+                  "lineHeight": "1"
+                },
+                "tickLabelColor": "#9FA6B4",
+                "ticksFormatter": "",
+                "showTicks": false,
+                "ticksColor": "rgba(0, 0, 0, 0.54)",
+                "showLine": false,
+                "lineColor": "rgba(0, 0, 0, 0.54)",
+                "showSplitLines": true,
+                "splitLinesColor": "rgba(0, 0, 0, 0.12)",
+                "id": "default",
+                "order": 0,
+                "interval": null,
+                "splitNumber": null,
+                "min": null,
+                "max": null,
+                "ticksGenerator": ""
+              }
+            },
+            "thresholds": [],
+            "dataZoom": true,
+            "stack": false,
+            "xAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "rgba(0, 0, 0, 0.54)",
+              "position": "bottom",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 10,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "#9FA6B4",
+              "showTicks": false,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": false,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": false,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)",
+              "ticksFormat": {}
+            },
+            "noAggregationBarWidthSettings": {
+              "strategy": "group",
+              "groupWidth": {
+                "relative": true,
+                "relativeWidth": 2,
+                "absoluteWidth": 1000
+              },
+              "barWidth": {
+                "relative": true,
+                "relativeWidth": 2,
+                "absoluteWidth": 1000
+              }
+            },
+            "showLegend": false,
+            "legendLabelFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "legendLabelColor": "rgba(0, 0, 0, 0.76)",
+            "legendConfig": {
+              "direction": "column",
+              "position": "right",
+              "sortDataKeys": false,
+              "showMin": false,
+              "showMax": false,
+              "showAvg": false,
+              "showTotal": false,
+              "showLatest": false
+            },
+            "showTooltip": true,
+            "tooltipTrigger": "axis",
+            "tooltipValueFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "16px"
+            },
+            "tooltipValueColor": "rgba(0, 0, 0, 0.76)",
+            "tooltipValueFormatter": "",
+            "tooltipShowDate": true,
+            "tooltipDateFormat": {
+              "format": null,
+              "lastUpdateAgo": false,
+              "custom": false,
+              "auto": true,
+              "autoDateFormatSettings": {
+                "millisecond": "MMM dd yyyy HH:mm:ss"
+              }
+            },
+            "tooltipDateFont": {
+              "family": "Roboto",
+              "size": 11,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "tooltipDateColor": "rgba(0, 0, 0, 0.76)",
+            "tooltipDateInterval": true,
+            "tooltipBackgroundColor": "rgba(255, 255, 255, 0.76)",
+            "tooltipBackgroundBlur": 4,
+            "animation": {
+              "animation": true,
+              "animationThreshold": 2000,
+              "animationDuration": 500,
+              "animationEasing": "cubicOut",
+              "animationDelay": 0,
+              "animationDurationUpdate": 300,
+              "animationEasingUpdate": "cubicOut",
+              "animationDelayUpdate": 0
+            },
+            "background": {
+              "type": "color",
+              "color": "#fff",
+              "overlay": {
+                "enabled": false,
+                "color": "rgba(255,255,255,0.72)",
+                "blur": 3
+              }
+            },
+            "padding": "12px",
+            "states": [],
+            "comparisonEnabled": false,
+            "timeForComparison": "previousInterval",
+            "comparisonCustomIntervalValue": 7200000,
+            "comparisonXAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "rgba(0, 0, 0, 0.54)",
+              "position": "top",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 10,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "rgba(0, 0, 0, 0.54)",
+              "ticksFormat": {},
+              "showTicks": true,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": true,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": true,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)"
+            },
+            "grid": {
+              "show": false,
+              "backgroundColor": null,
+              "borderWidth": 1,
+              "borderColor": "#ccc"
+            }
+          },
+          "title": "Fullness",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "padding": "5px 10px 5px 0px"
+          },
+          "configMode": "advanced",
+          "actions": {},
+          "showTitleIcon": false,
+          "titleIcon": "thermostat",
+          "iconColor": "#1F6BDD",
+          "useDashboardTimewindow": false,
+          "displayTimewindow": true,
+          "titleFont": {
+            "size": 16,
+            "sizeUnit": "px",
+            "family": "Roboto",
+            "weight": "500",
+            "style": "normal",
+            "lineHeight": "24px"
+          },
+          "titleColor": "#29313C",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "units": "",
+          "decimals": null,
+          "noDataDisplayMessage": "",
+          "timewindowStyle": {
+            "showIcon": false,
+            "iconSize": "24px",
+            "icon": null,
+            "iconPosition": "left",
+            "font": {
+              "size": 12,
+              "sizeUnit": "px",
+              "family": "Roboto",
+              "weight": "400",
+              "style": "normal",
+              "lineHeight": "16px"
+            },
+            "color": "rgba(0, 0, 0, 0.38)",
+            "displayTypePrefix": true
+          },
+          "margin": "0px",
+          "borderRadius": "",
+          "iconSize": "0px",
+          "enableDataExport": true
+        },
+        "row": 0,
+        "col": 0,
+        "id": "1c29fe6f-d07a-61c4-2c16-01c861588074"
+      },
+      "3432fdd3-4ce7-6221-f6f2-e551f414898a": {
+        "typeFullFqn": "system.time_series_chart",
+        "type": "timeseries",
+        "sizeX": 8,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": "",
+              "entityAliasId": "89427837-ec63-72e5-7388-d55276d731d8",
+              "dataKeys": [
+                {
+                  "name": "batteryLevel",
+                  "type": "timeseries",
+                  "label": "Battery level",
+                  "color": "#4B535B",
+                  "settings": {
+                    "yAxisId": "default",
+                    "showInLegend": true,
+                    "dataHiddenByDefault": false,
+                    "type": "line",
+                    "lineSettings": {
+                      "showLine": true,
+                      "step": false,
+                      "stepType": "start",
+                      "smooth": false,
+                      "lineType": "solid",
+                      "lineWidth": 2,
+                      "showPoints": false,
+                      "showPointLabel": false,
+                      "pointLabelPosition": "top",
+                      "pointLabelFont": {
+                        "family": "Roboto",
+                        "size": 11,
+                        "sizeUnit": "px",
+                        "style": "normal",
+                        "weight": "400",
+                        "lineHeight": "1"
+                      },
+                      "pointLabelColor": "rgba(0, 0, 0, 0.76)",
+                      "enablePointLabelBackground": false,
+                      "pointLabelBackground": "rgba(255,255,255,0.56)",
+                      "pointShape": "circle",
+                      "pointSize": 12,
+                      "fillAreaSettings": {
+                        "type": "none",
+                        "opacity": 0.4,
+                        "gradient": {
+                          "start": 100,
+                          "end": 0
+                        }
+                      }
+                    },
+                    "barSettings": {
+                      "showBorder": false,
+                      "borderWidth": 2,
+                      "borderRadius": 0,
+                      "showLabel": false,
+                      "labelPosition": "top",
+                      "labelFont": {
+                        "family": "Roboto",
+                        "size": 11,
+                        "sizeUnit": "px",
+                        "style": "normal",
+                        "weight": "400",
+                        "lineHeight": "1"
+                      },
+                      "labelColor": "rgba(0, 0, 0, 0.76)",
+                      "enableLabelBackground": false,
+                      "labelBackground": "rgba(255,255,255,0.56)",
+                      "backgroundSettings": {
+                        "type": "none",
+                        "opacity": 0.4,
+                        "gradient": {
+                          "start": 100,
+                          "end": 0
+                        }
+                      }
+                    },
+                    "tooltipValueFormatter": null,
+                    "comparisonSettings": {
+                      "showValuesForComparison": false,
+                      "comparisonValuesLabel": "",
+                      "color": ""
+                    }
+                  },
+                  "units": "%",
+                  "decimals": 1,
+                  "aggregationType": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "latestDataKeys": []
+            }
+          ],
+          "timewindow": {
+            "hideAggregation": false,
+            "hideAggInterval": false,
+            "hideTimezone": false,
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 0,
+              "interval": 10000,
+              "timewindowMs": 3600000,
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideQuickInterval": false
+            },
+            "history": {
+              "historyType": 0,
+              "interval": 1000,
+              "timewindowMs": 60000,
+              "fixedTimewindow": {
+                "startTimeMs": 1747642845232,
+                "endTimeMs": 1747729245232
+              },
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideFixedInterval": false,
+              "hideQuickInterval": false
+            },
+            "aggregation": {
+              "type": "AVG",
+              "limit": 25000
+            },
+            "timezone": null
+          },
+          "showTitle": true,
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "showLegend": false,
+            "legendConfig": {
+              "direction": "column",
+              "position": "top",
+              "sortDataKeys": false,
+              "showMin": false,
+              "showMax": false,
+              "showAvg": true,
+              "showTotal": false,
+              "showLatest": false
+            },
+            "thresholds": [],
+            "dataZoom": true,
+            "stack": false,
+            "yAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "rgba(0, 0, 0, 0.54)",
+              "position": "left",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "rgba(0, 0, 0, 0.54)",
+              "showTicks": true,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": true,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": true,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)"
+            },
+            "xAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "rgba(0, 0, 0, 0.54)",
+              "position": "bottom",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 10,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "#9FA6B4",
+              "ticksFormat": {},
+              "showTicks": false,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": false,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": false,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)"
+            },
+            "legendLabelFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "legendLabelColor": "rgba(0, 0, 0, 0.76)",
+            "showTooltip": true,
+            "tooltipTrigger": "axis",
+            "tooltipValueFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "16px"
+            },
+            "tooltipValueColor": "rgba(0, 0, 0, 0.76)",
+            "tooltipShowDate": true,
+            "tooltipDateFormat": {
+              "format": null,
+              "lastUpdateAgo": false,
+              "custom": false,
+              "auto": true,
+              "autoDateFormatSettings": {
+                "millisecond": "MMM dd yyyy HH:mm:ss"
+              }
+            },
+            "tooltipDateFont": {
+              "family": "Roboto",
+              "size": 11,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "tooltipDateColor": "rgba(0, 0, 0, 0.76)",
+            "tooltipDateInterval": true,
+            "tooltipBackgroundColor": "rgba(255, 255, 255, 0.76)",
+            "tooltipBackgroundBlur": 4,
+            "background": {
+              "type": "color",
+              "color": "#fff",
+              "overlay": {
+                "enabled": false,
+                "color": "rgba(255,255,255,0.72)",
+                "blur": 3
+              }
+            },
+            "yAxes": {
+              "default": {
+                "units": "%",
+                "decimals": null,
+                "show": true,
+                "label": "",
+                "labelFont": {
+                  "family": "Roboto",
+                  "size": 12,
+                  "sizeUnit": "px",
+                  "style": "normal",
+                  "weight": "600",
+                  "lineHeight": "1"
+                },
+                "labelColor": "rgba(0, 0, 0, 0.54)",
+                "position": "left",
+                "showTickLabels": true,
+                "tickLabelFont": {
+                  "family": "Roboto",
+                  "size": 12,
+                  "sizeUnit": "px",
+                  "style": "normal",
+                  "weight": "400",
+                  "lineHeight": "1"
+                },
+                "tickLabelColor": "#9FA6B4",
+                "ticksFormatter": null,
+                "showTicks": false,
+                "ticksColor": "rgba(0, 0, 0, 0.54)",
+                "showLine": false,
+                "lineColor": "rgba(0, 0, 0, 0.54)",
+                "showSplitLines": true,
+                "splitLinesColor": "rgba(0, 0, 0, 0.12)",
+                "id": "default",
+                "order": 0,
+                "ticksGenerator": null,
+                "interval": null,
+                "splitNumber": null,
+                "min": 0,
+                "max": 100
+              }
+            },
+            "noAggregationBarWidthSettings": {
+              "strategy": "group",
+              "groupWidth": {
+                "relative": true,
+                "relativeWidth": 2,
+                "absoluteWidth": 1000
+              },
+              "barWidth": {
+                "relative": true,
+                "relativeWidth": 2,
+                "absoluteWidth": 1000
+              }
+            },
+            "animation": {
+              "animation": true,
+              "animationThreshold": 2000,
+              "animationDuration": 500,
+              "animationEasing": "cubicOut",
+              "animationDelay": 0,
+              "animationDurationUpdate": 300,
+              "animationEasingUpdate": "cubicOut",
+              "animationDelayUpdate": 0
+            },
+            "padding": "12px",
+            "comparisonEnabled": false,
+            "timeForComparison": "previousInterval",
+            "comparisonCustomIntervalValue": 7200000,
+            "comparisonXAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "rgba(0, 0, 0, 0.54)",
+              "position": "top",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 10,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "rgba(0, 0, 0, 0.54)",
+              "ticksFormat": {},
+              "showTicks": true,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": true,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": true,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)"
+            },
+            "grid": {
+              "show": false,
+              "backgroundColor": null,
+              "borderWidth": 1,
+              "borderColor": "#ccc"
+            },
+            "legendColumnTitleFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "legendColumnTitleColor": "rgba(0, 0, 0, 0.38)",
+            "legendValueFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "16px"
+            },
+            "legendValueColor": "rgba(0, 0, 0, 0.87)",
+            "tooltipLabelFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "tooltipLabelColor": "rgba(0, 0, 0, 0.76)"
+          },
+          "title": "Battery level",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "padding": "5px 10px 5px 0px"
+          },
+          "configMode": "basic",
+          "actions": {},
+          "showTitleIcon": false,
+          "titleIcon": "thermostat",
+          "iconColor": "#1F6BDD",
+          "useDashboardTimewindow": false,
+          "displayTimewindow": true,
+          "titleFont": {
+            "size": 16,
+            "sizeUnit": "px",
+            "family": "Roboto",
+            "weight": "500",
+            "style": "normal",
+            "lineHeight": "24px"
+          },
+          "titleColor": "#29313C",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "units": "",
+          "decimals": null,
+          "noDataDisplayMessage": "",
+          "timewindowStyle": {
+            "showIcon": false,
+            "iconSize": "24px",
+            "icon": null,
+            "iconPosition": "left",
+            "font": {
+              "size": 12,
+              "sizeUnit": "px",
+              "family": "Roboto",
+              "weight": "400",
+              "style": "normal",
+              "lineHeight": "16px"
+            },
+            "color": "rgba(0, 0, 0, 0.38)",
+            "displayTypePrefix": true
+          },
+          "margin": "0px",
+          "borderRadius": "",
+          "iconSize": "0px",
+          "enableDataExport": true
+        },
+        "row": 0,
+        "col": 0,
+        "id": "3432fdd3-4ce7-6221-f6f2-e551f414898a"
+      }
+    },
+    "states": {
+      "default": {
+        "name": "Waste Management Administration",
+        "root": true,
+        "layouts": {
+          "main": {
+            "widgets": {
+              "ad8020a2-53fd-8334-c94e-2a7af3774780": {
+                "sizeX": 36,
+                "sizeY": 41,
+                "row": 0,
+                "col": 28,
+                "resizable": true,
+                "mobileHeight": 4
+              },
+              "6743d611-3f49-5caf-4e28-c06eeebbe225": {
+                "sizeX": 7,
+                "sizeY": 4,
+                "row": 0,
+                "col": 0,
+                "resizable": true,
+                "mobileHeight": 1
+              },
+              "81c766cd-ae80-9f5e-fa44-9717cb1ba84f": {
+                "sizeX": 7,
+                "sizeY": 4,
+                "row": 0,
+                "col": 7,
+                "resizable": true,
+                "mobileHeight": 1
+              },
+              "fdcc234a-0d39-30b8-318a-9fad15085bb0": {
+                "sizeX": 7,
+                "sizeY": 4,
+                "row": 0,
+                "col": 14,
+                "resizable": true,
+                "mobileHeight": 1
+              },
+              "369fcee9-5f64-e56d-d723-64f46ec383d1": {
+                "sizeX": 7,
+                "sizeY": 4,
+                "row": 0,
+                "col": 21,
+                "resizable": true,
+                "mobileHeight": 1
+              },
+              "14b9092d-f098-0ce9-e214-3e19032d450a": {
+                "sizeX": 28,
+                "sizeY": 20,
+                "row": 4,
+                "col": 0,
+                "resizable": true,
+                "mobileHeight": 5
+              },
+              "bd47533e-1ef8-bea5-e982-728322a17536": {
+                "sizeX": 28,
+                "sizeY": 17,
+                "row": 24,
+                "col": 0,
+                "resizable": true,
+                "mobileHeight": 5
+              }
+            },
+            "gridSettings": {
+              "backgroundColor": "#f9f9fb",
+              "columns": 64,
+              "margin": 16,
+              "backgroundSizeMode": "100%",
+              "autoFillHeight": true,
+              "backgroundImageUrl": null,
+              "mobileAutoFillHeight": false,
+              "mobileRowHeight": 70,
+              "outerMargin": true,
+              "layoutType": "default",
+              "minColumns": 64,
+              "viewFormat": "grid",
+              "rowHeight": 70
+            }
+          }
+        }
+      },
+      "selected_bin": {
+        "name": "Sensor ${entityName}",
+        "root": false,
+        "layouts": {
+          "main": {
+            "widgets": {
+              "b89177ac-8f67-3ae5-dfc8-945d995ced41": {
+                "sizeX": 8,
+                "sizeY": 8,
+                "row": 0,
+                "col": 0,
+                "resizable": true,
+                "mobileHeight": 6
+              },
+              "6672413e-b50d-c915-a8da-47f873df2458": {
+                "sizeX": 17,
+                "sizeY": 8,
+                "row": 8,
+                "col": 0
+              },
+              "f7e58e0e-4207-8e1c-1825-67d85a19234a": {
+                "sizeX": 9,
+                "sizeY": 8,
+                "row": 0,
+                "col": 8
+              },
+              "1c29fe6f-d07a-61c4-2c16-01c861588074": {
+                "sizeX": 15,
+                "sizeY": 8,
+                "row": 0,
+                "col": 17
+              },
+              "3432fdd3-4ce7-6221-f6f2-e551f414898a": {
+                "sizeX": 15,
+                "sizeY": 8,
+                "row": 8,
+                "col": 17
+              }
+            },
+            "gridSettings": {
+              "backgroundColor": "#f9f9fb",
+              "columns": 32,
+              "margin": 16,
+              "backgroundSizeMode": "100%",
+              "autoFillHeight": true,
+              "backgroundImageUrl": null,
+              "mobileAutoFillHeight": false,
+              "mobileRowHeight": 50,
+              "outerMargin": true,
+              "layoutType": "default",
+              "minColumns": 32,
+              "viewFormat": "grid",
+              "rowHeight": 70
+            }
+          }
+        }
+      }
+    },
+    "entityAliases": {
+      "6ee2c775-15f1-e7dc-a368-12a263215530": {
+        "id": "6ee2c775-15f1-e7dc-a368-12a263215530",
+        "alias": "Waste Sensors",
+        "filter": {
+          "type": "deviceType",
+          "resolveMultiple": true,
+          "deviceTypes": [
+            "Waste Sensor",
+            "default"
+          ],
+          "deviceNameFilter": ""
+        }
+      },
+      "bbd8598b-83a5-5da8-43d3-4fd989919131": {
+        "id": "bbd8598b-83a5-5da8-43d3-4fd989919131",
+        "alias": "Current Customer",
+        "filter": {
+          "type": "singleEntity",
+          "resolveMultiple": true,
+          "singleEntity": {
+            "entityType": "CURRENT_CUSTOMER",
+            "id": "7aa99e80-8acd-11ef-a59e-a9c993dbec14"
+          }
+        }
+      },
+      "89427837-ec63-72e5-7388-d55276d731d8": {
+        "id": "89427837-ec63-72e5-7388-d55276d731d8",
+        "alias": "Sensor",
+        "filter": {
+          "type": "stateEntity",
+          "resolveMultiple": true,
+          "stateEntityParamName": null,
+          "defaultStateEntity": null
+        }
+      }
+    },
+    "filters": {
+      "b57ed975-3305-c009-023a-bbb9d8fd36ee": {
+        "id": "b57ed975-3305-c009-023a-bbb9d8fd36ee",
+        "filter": "Bins filter",
+        "keyFilters": [
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "isFull"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "OR",
+                  "predicates": [
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "EQUAL",
+                        "value": {
+                          "defaultValue": true,
+                          "dynamicValue": null
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    },
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "EQUAL",
+                        "value": {
+                          "defaultValue": false,
+                          "dynamicValue": {
+                            "sourceType": "CURRENT_CUSTOMER",
+                            "sourceAttribute": "displayFullBins",
+                            "inherit": false
+                          }
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    }
+                  ],
+                  "type": "COMPLEX"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          },
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "isLowBattery"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "OR",
+                  "predicates": [
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "EQUAL",
+                        "value": {
+                          "defaultValue": true,
+                          "dynamicValue": null
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    },
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "EQUAL",
+                        "value": {
+                          "defaultValue": false,
+                          "dynamicValue": {
+                            "sourceType": "CURRENT_CUSTOMER",
+                            "sourceAttribute": "displayLowBatteryBins",
+                            "inherit": false
+                          }
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    }
+                  ],
+                  "type": "COMPLEX"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          },
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "active"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "OR",
+                  "predicates": [
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "EQUAL",
+                        "value": {
+                          "defaultValue": false,
+                          "dynamicValue": null
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    },
+                    {
+                      "keyFilterPredicate": {
+                        "operation": "NOT_EQUAL",
+                        "value": {
+                          "defaultValue": false,
+                          "dynamicValue": {
+                            "sourceType": "CURRENT_CUSTOMER",
+                            "sourceAttribute": "displayOfflineBins",
+                            "inherit": false
+                          }
+                        },
+                        "type": "BOOLEAN"
+                      },
+                      "userInfo": {
+                        "editable": true,
+                        "label": "",
+                        "autogeneratedLabel": true,
+                        "order": 0
+                      }
+                    }
+                  ],
+                  "type": "COMPLEX"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          }
+        ],
+        "editable": true
+      },
+      "4a477eb5-ba36-f5a8-0723-00d76f5f5687": {
+        "id": "4a477eb5-ba36-f5a8-0723-00d76f5f5687",
+        "filter": "Full bins",
+        "keyFilters": [
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "isFull"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "EQUAL",
+                  "value": {
+                    "defaultValue": true,
+                    "dynamicValue": null
+                  },
+                  "type": "BOOLEAN"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          }
+        ],
+        "editable": true
+      },
+      "b01ebf89-e19a-7627-14f7-a4f8c597b2fb": {
+        "id": "b01ebf89-e19a-7627-14f7-a4f8c597b2fb",
+        "filter": "Low Battery bins",
+        "keyFilters": [
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "isLowBattery"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "EQUAL",
+                  "value": {
+                    "defaultValue": true,
+                    "dynamicValue": null
+                  },
+                  "type": "BOOLEAN"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          }
+        ],
+        "editable": true
+      },
+      "cfdc11b4-28e0-0332-de61-fa20e4c17e56": {
+        "id": "cfdc11b4-28e0-0332-de61-fa20e4c17e56",
+        "filter": "Offline bins",
+        "keyFilters": [
+          {
+            "key": {
+              "type": "ATTRIBUTE",
+              "key": "active"
+            },
+            "valueType": "BOOLEAN",
+            "predicates": [
+              {
+                "keyFilterPredicate": {
+                  "operation": "NOT_EQUAL",
+                  "value": {
+                    "defaultValue": true,
+                    "dynamicValue": null
+                  },
+                  "type": "BOOLEAN"
+                },
+                "userInfo": {
+                  "editable": true,
+                  "label": "",
+                  "autogeneratedLabel": true,
+                  "order": 0
+                }
+              }
+            ]
+          }
+        ],
+        "editable": true
+      }
+    },
+    "timewindow": {
+      "selectedTab": 0,
+      "realtime": {
+        "realtimeType": 0,
+        "timewindowMs": 604800000
+      },
+      "aggregation": {
+        "type": "NONE",
+        "limit": 25000
+      }
+    },
+    "settings": {
+      "stateControllerId": "entity",
+      "showTitle": false,
+      "showDashboardsSelect": false,
+      "showEntitiesSelect": false,
+      "showDashboardTimewindow": true,
+      "showDashboardExport": true,
+      "toolbarAlwaysOpen": true,
+      "titleColor": "rgba(0,0,0,0.870588)",
+      "showDashboardLogo": false,
+      "dashboardLogoUrl": null,
+      "hideToolbar": false,
+      "showFilters": false,
+      "showUpdateDashboardImage": false,
+      "dashboardCss": ".tb-widget-container > .tb-widget {\n    border-radius: 8px;\n    box-shadow: 0px 2px 8px rgba(222, 223, 224, 0.25);\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget {\n    color: #4B535B !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-markdown-view {\n    overflow: hidden !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-header-cell {\n    color: #9FA6B4 !important;\n    font-weight: 500;\n    font-size: 12px;\n    line-height: 16px;\n    letter-spacing: 0.25px;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-cell {\n    color: #4B535B;\n    border-bottom-color: transparent;\n    font-size: 14px;\n    line-height: 20px;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .no-data-found {\n    font-weight: 500;\n    font-size: 14px;\n    letter-spacing: 0.25px;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-row:hover:not(.tb-current-entity),\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-row:hover:not(.tb-current-entity) .mat-cell.mat-table-sticky {\n    background-color: #F9F9FB !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-header-cell .mat-sort-header-arrow {\n    color: #9FA6B4 !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-input-element::placeholder,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-input-element::-moz-placeholder,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-input-element::-webkit-input-placeholder,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-input-element:-ms-input-placeholder {\n    color: #9FA6B4 !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-cell .mat-checkbox-frame,.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-header-cell .mat-checkbox-frame {\n    border-color : #9FA6B4 !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-table .mat-cell button.mat-icon-button mat-icon,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-widget-actions mat-icon {\n    color: #757575 !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-paginator,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-paginator button.mat-icon-button,\n.tb-dashboard-page .tb-widget-container > .tb-widget .tb-table-widget .mat-paginator .mat-select-value {\n    color: #9FA6B4 !important;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-control-zoom-in,\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-control-zoom-out {\n    color: #4B535B;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-control-zoom-in {\n    border-radius: 6px 6px 0 0;\n    border-bottom: 1px solid transparent; \n}\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-control-zoom-out {\n    border-radius: 0 0 6px 6px;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-control,\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-buttons-control-button{\n    border: none;\n}\n\n.tb-dashboard-page .tb-widget-container > .tb-widget .leaflet-popup a.tb-custom-action {\n    font-family: 'Roboto';\n    font-weight: 500;\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    border-bottom: none;\n}\n\n.bin-card,\n.bin-card .mdc-button {\n    padding: 0 !important;\n    height: 100%;\n    width: 100%;\n    border-radius: 8px;\n}\n\n.bin-card .mdc-button {\n    border-bottom: 3px solid #fff;\n    transition: all 0.2s ease-in-out;\n}\n\n.bin-card .mat-mdc-button:hover .mat-mdc-button-persistent-ripple:before,\n.bin-card .mat-mdc-outlined-button:hover .mat-mdc-button-persistent-ripple:before {\n    opacity: 0;\n}\n  \n.bin-card .mdc-button:hover {\n    border-bottom: 3px solid #E7E7E7;\n    background-color: #fff;\n}\n\n.bin-card .bin-card-selected {\n    border-bottom: 3px solid #305680;\n}\n\n.bin-card .bin-card-selected:hover {\n    border-bottom: 3px solid #305680;\n    cursor: initial;\n}\n\n.bin-card .mdc-button__label {\n    width: 100%;\n    margin-top: 4px;\n}\n\n.bin-card-content {\n    padding: 0 16px;\n}\n\n.bin-card-content img {\n    width: 40px;\n    height: 40px;\n}\n\n.bin-card-data {\n    text-align: left;\n    margin-left: 16px;\n}\n\n.bin-card-content .bin-card-header {\n    margin-bottom: 4px;\n    font-size: 12px;\n    line-height: 16px;\n    letter-spacing: 0.25px;\n    color: #9FA6B4;\n    white-space: nowrap;\n}\n\n.bin-card-content .bin-card-value {\n    font-size: 24px;\n    line-height: 24px;\n    color: rgba(0, 0, 0, 0.87);\n}\n\n@media (max-width: 1599px) {\n    \n    .bin-card-content {\n        padding: 0 8px;\n    }\n    \n    .bin-card-content img {\n        width: 32px;\n        height: 32px;\n    }\n    \n    .bin-card-data {\n        margin-left: 8px;\n    }\n    \n    .bin-card-content .bin-card-header {\n        font-size: 10px;\n        line-height: 12px;\n        margin-bottom: 0;\n    }\n    \n    .bin-card-content .bin-card-value {\n        font-size: 18px;\n        line-height: 20px;\n    }\n}"
+    }
+  },
+  "name": "Waste Management Administration",
+  "resources": [
+    {
+      "link": "/api/images/system/here_map_system_widget_map_image.svg",
+      "title": "\"HERE Map\" system widget map image",
+      "type": "IMAGE",
+      "subType": "IMAGE",
+      "fileName": "here_map_system_widget_map_image.svg",
+      "publicResourceKey": "xXp2oeWLvWQquUVoOlAgDPjD0vKnkiwQ",
+      "mediaType": "image/svg+xml",
+      "data": "PHN2ZyBpZD0ic3ZnMiIgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMTAwIiB3aWR0aD0iMTAwIiB2ZXJzaW9uPSIxLjEiIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgogPGcgaWQ9ImxheWVyMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAtOTUyLjM2KSI+CiAgPHJlY3QgaWQ9InJlY3Q0Njg0IiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBoZWlnaHQ9Ijk5LjAxIiB3aWR0aD0iOTkuMDEiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiB5PSI5NTIuODYiIHg9Ii40OTUwNSIgc3Ryb2tlLXdpZHRoPSIuOTkwMTAiIGZpbGw9IiNlZWUiLz4KICA8dGV4dCBpZD0idGV4dDQ2ODYiIHN0eWxlPSJ3b3JkLXNwYWNpbmc6MHB4O2xldHRlci1zcGFjaW5nOjBweDt0ZXh0LWFuY2hvcjptaWRkbGU7dGV4dC1hbGlnbjpjZW50ZXIiIGZvbnQtd2VpZ2h0PSJib2xkIiB4bWw6c3BhY2U9InByZXNlcnZlIiBmb250LXNpemU9IjEwcHgiIGxpbmUtaGVpZ2h0PSIxMjUlIiB5PSI5NzAuNzI4MDkiIHg9IjQ5LjM5NjQ3NyIgZm9udC1mYW1pbHk9IlJvYm90byIgZmlsbD0iIzY2NjY2NiI+PHRzcGFuIGlkPSJ0c3BhbjQ2OTAiIHg9IjUwLjY0NjQ3NyIgeT0iOTcwLjcyODA5Ij5JbWFnZSBiYWNrZ3JvdW5kIDwvdHNwYW4+PHRzcGFuIGlkPSJ0c3BhbjQ2OTIiIHg9IjQ5LjM5NjQ3NyIgeT0iOTgzLjIyODA5Ij5pcyBub3QgY29uZmlndXJlZDwvdHNwYW4+PC90ZXh0PgogIDxyZWN0IGlkPSJyZWN0NDY5NCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgaGVpZ2h0PSIxOS4zNiIgd2lkdGg9IjY5LjM2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgeT0iOTkyLjY4IiB4PSIxNS4zMiIgc3Ryb2tlLXdpZHRoPSIuNjM5ODYiIGZpbGw9Im5vbmUiLz4KIDwvZz4KPC9zdmc+Cg==",
+      "public": true
+    },
+    {
+      "link": "/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_0.svg",
+      "title": "\"Waste Management Administration\" dashboard widget \"Bins Map\" marker image 0",
+      "type": "IMAGE",
+      "subType": "IMAGE",
+      "fileName": "waste_management_administration_dashboard_widget_bins_map_marker_image_0.svg",
+      "publicResourceKey": "7EncqOMuO4YxDxhPUetfNXGIa6hZiuZS",
+      "mediaType": "image/svg+xml",
+      "data": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiBmaWxsPSIjZmZmIiByeD0iNCIvPjxwYXRoIHN0cm9rZT0iIzE5ODAzOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik01IDcuNGgxOE0yMSA4djE0YTIgMiAwIDAgMS0yIDJIOWEyIDIgMCAwIDEtMi0yVjhtMy0uOVY2YTIgMiAwIDAgMSAyLTJoNGEyIDIgMCAwIDEgMiAydjEuMU0xMiAxM3Y2TTE2IDEzdjYiLz48L3N2Zz4=",
+      "public": true
+    },
+    {
+      "link": "/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_1.svg",
+      "title": "\"Waste Management Administration\" dashboard widget \"Bins Map\" marker image 1",
+      "type": "IMAGE",
+      "subType": "IMAGE",
+      "fileName": "waste_management_administration_dashboard_widget_bins_map_marker_image_1.svg",
+      "publicResourceKey": "mpIzYZvgHJQ91tncvUqj7sRxFwqabU8h",
+      "mediaType": "image/svg+xml",
+      "data": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiBmaWxsPSIjZmZmIiByeD0iNCIvPjxwYXRoIHN0cm9rZT0iI0QxMjczMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik01IDcuNGgxOE0yMSA4djE0YTIgMiAwIDAgMS0yIDJIOWEyIDIgMCAwIDEtMi0yVjhtMy0uOVY2YTIgMiAwIDAgMSAyLTJoNGEyIDIgMCAwIDEgMiAydjEuMU0xMiAxM3Y2TTE2IDEzdjYiLz48L3N2Zz4=",
+      "public": true
+    },
+    {
+      "link": "/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_2.svg",
+      "title": "\"Waste Management Administration\" dashboard widget \"Bins Map\" marker image 2",
+      "type": "IMAGE",
+      "subType": "IMAGE",
+      "fileName": "waste_management_administration_dashboard_widget_bins_map_marker_image_2.svg",
+      "publicResourceKey": "CeXIMDD4hqiHTKvUTU8JmX7KleQSwc5F",
+      "mediaType": "image/svg+xml",
+      "data": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiBmaWxsPSIjZmZmIiByeD0iNCIvPjxwYXRoIHN0cm9rZT0iI0ZGOEEwMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik01IDcuNGgxOE0yMSA4djE0YTIgMiAwIDAgMS0yIDJIOWEyIDIgMCAwIDEtMi0yVjhtMy0uOVY2YTIgMiAwIDAgMSAyLTJoNGEyIDIgMCAwIDEgMiAydjEuMU0xMiAxM3Y2TTE2IDEzdjYiLz48L3N2Zz4=",
+      "public": true
+    },
+    {
+      "link": "/api/images/system/waste_management_administration_dashboard_widget_bins_map_marker_image_3.svg",
+      "title": "\"Waste Management Administration\" dashboard widget \"Bins Map\" marker image 3",
+      "type": "IMAGE",
+      "subType": "IMAGE",
+      "fileName": "waste_management_administration_dashboard_widget_bins_map_marker_image_3.svg",
+      "publicResourceKey": "hHoDYreRpopdUrAXkxfRDWcA4GDdPFrZ",
+      "mediaType": "image/svg+xml",
+      "data": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgZmlsbD0ibm9uZSI+PHJlY3Qgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiBmaWxsPSIjZmZmIiByeD0iNCIvPjxwYXRoIHN0cm9rZT0iIzc1NzU3NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik01IDcuNGgxOE0yMSA4djE0YTIgMiAwIDAgMS0yIDJIOWEyIDIgMCAwIDEtMi0yVjhtMy0uOVY2YTIgMiAwIDAgMSAyLTJoNGEyIDIgMCAwIDEgMiAydjEuMU0xMiAxM3Y2TTE2IDEzdjYiLz48L3N2Zz4=",
+      "public": true
+    }
+  ]
+}
