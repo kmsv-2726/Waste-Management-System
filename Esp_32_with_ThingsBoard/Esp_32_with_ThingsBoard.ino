@@ -11,7 +11,7 @@
 
 /* ================= THINGSBOARD ================= */
 #define TB_SERVER "thingsboard.cloud"
-#define TB_PORT 1883
+#define TB_PORT 8883
 #define TB_TOKEN "mDbtWAR119hFXVd8iSZ8"
 
 /* ================= NETWORK CONFIG ================= */
@@ -30,7 +30,7 @@
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 60000);
 
-WiFiClient espClient;
+WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 /* ================= QUEUES ================= */
@@ -92,9 +92,14 @@ int pop(int q[],int &head){
 /* ================= MQTT RECONNECT ================= */
 void reconnectMQTT(){
   while(!client.connected()){
-    if(client.connect("GatewayClient",TB_TOKEN,NULL)){
+    Serial.println("Attempting MQTT connection...");
+    
+    if(client.connect("GatewayClient", TB_TOKEN, NULL)){
+      Serial.println("MQTT connected!");
       client.subscribe("v1/devices/me/rpc/request/+");
     } else {
+      Serial.print("MQTT failed, rc=");
+      Serial.println(client.state());
       delay(2000);
     }
   }
@@ -150,6 +155,10 @@ void setup(){
   WiFi.begin(WIFI_SSID,WIFI_PASS);
   while(WiFi.status()!=WL_CONNECTED) delay(500);
 
+  Serial.println("WiFi connected!");
+  Serial.println(WiFi.localIP());
+  
+  espClient.setInsecure();
   client.setServer(TB_SERVER,TB_PORT);
   client.setCallback(rpcCallback);
 
