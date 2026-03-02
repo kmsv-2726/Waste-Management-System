@@ -356,6 +356,7 @@ void parseScan(String packet,int start,int node,int rssi){
   float hum=data.substring(i2+1,i3).toFloat();
   int gas=data.substring(i3+1,i4).toInt();
   float battery=data.substring(i4+1,i5).toFloat();
+  String ultraData = data.substring(i5+1);
 
   unsigned long timestamp = timeClient.getEpochTime() * 1000UL;
 
@@ -366,6 +367,7 @@ void parseScan(String packet,int start,int node,int rssi){
   json+="\"humidity\":"+String(hum)+",";
   json+="\"gas\":"+String(gas)+",";
   json+="\"battery\":"+String(battery,2)+",";
+  json+="\"ultrasonic\":\""+ultraData+"\",";
   json+="\"rssi\":"+String(rssi)+",";
   json+="\"ts\":"+String(timestamp);
   json+="}";
