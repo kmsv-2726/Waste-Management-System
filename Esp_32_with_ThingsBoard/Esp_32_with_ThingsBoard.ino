@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>  
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <PubSubClient.h>
@@ -13,6 +14,10 @@
 #define TB_SERVER "thingsboard.cloud"
 #define TB_PORT 8883
 #define TB_TOKEN "mDbtWAR119hFXVd8iSZ8"
+
+/* ================= DEVICE NAMES ================= */
+#define BIN1_NAME "BIN_1"
+#define BIN2_NAME "BIN_2"
 
 /* ================= NETWORK CONFIG ================= */
 #define TOTAL_NODES 3
@@ -43,12 +48,40 @@ bool busy=false;
 int currentNode=-1;
 unsigned long commandStartTime=0;
 int lastHour=-1;
-int gatewaySF = 10;   // Global Gateway Spreading Factor
+int gatewaySF = 10;
 
 /* ================= ADR ================= */
 int nodeSF[TOTAL_NODES + 1] = {0};
 bool adrEnabled = true;
 
+/* ================= DEVICE REGISTER ================= */
+void registerDevices(){
+  String payload="{\"devices\":[\"BIN_1\",\"BIN_2\"]}";
+  client.publish("v1/gateway/connect", payload.c_str());
+}
+
+/* ================= TELEMETRY ROUTER ================= */
+void sendGatewayTelemetry(int node, String payload){
+
+  String deviceName;
+
+  if(node==1)
+    deviceName = BIN1_NAME;
+  else if(node==2)
+    deviceName = BIN2_NAME;
+  else
+    deviceName = "UNKNOWN";
+
+  String json="{\"";
+  json+=deviceName;
+  json+="\":[";
+  json+=payload;
+  json+="]}";
+
+  client.publish("v1/gateway/telemetry", json.c_str());
+}
+
+/* ================= ADR ================= */
 void adjustDataRate(int node, int rssi){
 
   if(!adrEnabled) return;
@@ -91,13 +124,17 @@ int pop(int q[],int &head){
 
 /* ================= MQTT RECONNECT ================= */
 void reconnectMQTT(){
+
   while(!client.connected()){
+
     Serial.println("Attempting MQTT connection...");
     
     if(client.connect("GatewayClient", TB_TOKEN, NULL)){
       Serial.println("MQTT connected!");
+      registerDevices();
       client.subscribe("v1/devices/me/rpc/request/+");
-    } else {
+    } 
+    else {
       Serial.print("MQTT failed, rc=");
       Serial.println(client.state());
       delay(2000);
@@ -212,78 +249,25 @@ void handleSerial(){
   String cmd = Serial.readStringUntil('\n');
   cmd.trim();
 
-  /* ---------- MANUAL SCAN ---------- */
   if(cmd.startsWith("scan")){
     int node = cmd.substring(5).toInt();
     push(manualQ, mTail, node);
-    Serial.println("Manual scan queued");
   }
 
-  /* ---------- EMERGENCY ---------- */
   else if(cmd.startsWith("emergency")){
     int node = cmd.substring(10).toInt();
     push(emergencyQ, eTail, node);
-    Serial.println("Emergency scan queued");
   }
 
-  /* ---------- ADR CONTROL ---------- */
   else if(cmd == "adr on"){
     adrEnabled = true;
-    Serial.println("ADR Enabled");
   }
 
   else if(cmd == "adr off"){
     adrEnabled = false;
-    Serial.println("ADR Disabled");
-  }
-
-  /* ---------- SHOW GATEWAY SF ---------- */
-  else if(cmd == "sf"){
-    Serial.print("Gateway SF: ");
-    Serial.println(gatewaySF);
-  }
-
-  /* ---------- SET GATEWAY SF ---------- */
-  else if(cmd.startsWith("setsf")){
-    int newSF = cmd.substring(6).toInt();
-
-    if(newSF >= 7 && newSF <= 12){
-      gatewaySF = newSF;
-      LoRa.setSpreadingFactor(gatewaySF);
-
-      Serial.print("Gateway SF updated to: ");
-      Serial.println(gatewaySF);
-    }
-    else{
-      Serial.println("Invalid SF (7–12 only)");
-    }
-  }
-
-  /* ---------- SHOW NODE SF TABLE ---------- */
-  else if(cmd == "nodesf"){
-    Serial.println("Node SF Table:");
-    for(int i=1;i<=TOTAL_NODES;i++){
-      Serial.print("Node ");
-      Serial.print(i);
-      Serial.print(" -> SF: ");
-      Serial.println(nodeSF[i]);
-    }
-  }
-
-  /* ---------- STATUS ---------- */
-  else if(cmd == "status"){
-    Serial.println("------ GATEWAY STATUS ------");
-    Serial.print("Busy: "); Serial.println(busy);
-    Serial.print("Current Node: "); Serial.println(currentNode);
-    Serial.print("Gateway SF: "); Serial.println(gatewaySF);
-    Serial.print("ADR Enabled: "); Serial.println(adrEnabled);
-    Serial.println("----------------------------");
-  }
-
-  else{
-    Serial.println("Unknown Command");
   }
 }
+
 /* ================= EXECUTION ENGINE ================= */
 void executeQueue(){
 
@@ -372,7 +356,7 @@ void parseScan(String packet,int start,int node,int rssi){
   json+="\"ts\":"+String(timestamp);
   json+="}";
 
-  client.publish("v1/devices/me/telemetry",json.c_str());
+  sendGatewayTelemetry(node,json);
 
   adjustDataRate(node, rssi);
   sendACK(node,seq);
@@ -395,7 +379,7 @@ void parseAlert(String packet,int start,int node,int rssi){
   json+="\"ts\":"+String(timestamp);
   json+="}";
 
-  client.publish("v1/devices/me/telemetry",json.c_str());
+  sendGatewayTelemetry(node,json);
 }
 
 /* ================= ACK ================= */
